@@ -1,0 +1,696 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Compras · Cotizaciones · Comind</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#314147;--ink:#26343a;--muted:#7b878c;--lav:#f2f2f5;--line:#e4e6e9;--link:#e44400;--green:#e44400;--head:#e6e8ea;
+--c-white:#ffffff;--c-yellow:#FFE599;--c-green:#B6D7A8;--c-red:#EA9999}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;padding:28px;min-height:100vh;font:14px/1.45 "Plus Jakarta Sans","Inter","Segoe UI",system-ui,sans-serif;color:var(--ink);
+background:linear-gradient(135deg,#3f5963 0%,#314147 48%,#222d32 100%) fixed}
+button{font:inherit;color:inherit;cursor:pointer}
+svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+svg.i.s{width:16px;height:16px}
+.hidden{display:none!important}
+.app{display:grid;grid-template-columns:80px minmax(0,1fr);background:#fff;border-radius:22px;overflow:hidden;min-height:calc(100vh - 56px);box-shadow:0 24px 70px rgba(35,45,140,.28)}
+/* sidebar */
+.side{display:flex;flex-direction:column;align-items:center;padding:20px 0;gap:6px;border-right:1px solid #f0f4f6;background:#fff}
+.logo{width:44px;height:44px;margin-bottom:18px}
+.nav{width:46px;height:46px;border-radius:14px;border:0;background:none;color:#385059;display:grid;place-items:center;position:relative}
+.nav:hover{background:#f4f7f8}
+.nav.active{box-shadow:inset 3px 0 0 #e44400;background:#ecf1f3;color:var(--navy)}
+.nav .tip{position:absolute;left:58px;background:var(--navy);color:#fff;font-size:12px;font-weight:600;padding:5px 10px;border-radius:8px;white-space:nowrap;opacity:0;pointer-events:none;transform:translateX(-4px);transition:.15s;z-index:30}
+.nav:hover .tip{opacity:1;transform:none}
+.nav .dot{position:absolute;top:6px;right:6px;min-width:16px;height:16px;border-radius:9px;background:#e5706f;color:#fff;font-size:10px;font-weight:700;display:grid;place-items:center;padding:0 4px}
+.sep{width:30px;height:1px;background:#ebf0f2;margin:10px 0}
+.main{display:flex;flex-direction:column;min-width:0;background:var(--lav)}
+.topbar{height:52px;background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 22px;gap:16px;flex:none}
+.crumb{display:flex;align-items:center;gap:12px;font-weight:600;font-size:15px}
+.crumb span.sep2{opacity:.7}
+.tops{display:flex;gap:6px;align-items:center}
+.tops button{background:none;border:0;color:#fff;display:flex;align-items:center;gap:8px;font-weight:600;font-size:14px;padding:8px 12px;border-radius:8px}
+.tops button:hover{background:#ffffff1c}
+.pagehead{background:#fff;padding:26px 40px 24px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;border-bottom:1px solid #eef3f5}
+.pagehead h1{margin:0;font-size:34px;line-height:1.1;font-weight:800;letter-spacing:-.5px}
+.pagehead p{margin:4px 0 0;color:var(--muted);font-size:13px}
+.pact{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:9px;border-radius:999px;padding:12px 22px;font-weight:700;font-size:15px;border:1px solid #e3eaed;background:#fff;color:var(--ink);position:relative;white-space:nowrap;transition:.12s}
+.btn:hover{background:#f8fafa}
+.btn.green{background:var(--green);border-color:var(--green);color:#fff}
+.btn.green:hover{background:#c43a00}
+.btn.dark{background:var(--navy);border-color:var(--navy);color:#fff}
+.btn.dark:hover{background:#3f5963}
+.btn.sm{padding:8px 16px;font-size:13px}
+.btn.xs{padding:6px 12px;font-size:12px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.danger{color:#b4372f}
+.badge{position:absolute;top:-8px;right:-4px;min-width:22px;height:22px;border-radius:11px;background:#e5706f;color:#fff;font-size:12px;font-weight:700;display:grid;place-items:center;padding:0 6px}
+.content{padding:28px 40px 40px;flex:1;min-width:0}
+/* stats */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:18px;margin-bottom:22px}
+.stat{display:flex;align-items:center;gap:14px;background:#fff;border:2px solid transparent;border-radius:14px;padding:16px 18px;text-align:left;box-shadow:0 2px 10px #2a368c0d;font-weight:600;font-size:15px}
+.stat:hover{box-shadow:0 4px 16px #2a368c1c}
+.stat.active{border-color:var(--navy)}
+.stat .n{width:46px;height:46px;border-radius:50%;border:1.5px solid #e0e8ec;display:grid;place-items:center;font-size:20px;font-weight:600;color:#c98d1c;flex:none;background:#fff}
+.stat.all .n{color:#7096a5}
+.stat.white .n{color:#7e929a;border-color:#d2dee3}
+.stat.yellow .n{border-color:var(--c-yellow);color:#a67c00;background:#fff9e3}
+.stat.green .n{border-color:var(--c-green);color:#3d7a31;background:#f1f8ee}
+.stat.red .n{border-color:var(--c-red);color:#a63c3c;background:#fceeee}
+/* filter bar */
+.bar{display:flex;align-items:center;gap:8px;background:#fff;border-radius:12px;padding:0 0 0 14px;height:62px;margin-bottom:22px;box-shadow:0 2px 10px #2a368c0d;position:relative}
+.pill{display:inline-flex;align-items:center;gap:6px;background:var(--navy);color:#fff;border:0;border-radius:999px;height:36px;padding:0 14px;font-weight:600;font-size:14px}
+.pill.round{width:36px;padding:0;justify-content:center}
+.pill.off{background:#ebf0f2;color:#5e7882}
+.search{margin-left:auto;display:flex;align-items:center;gap:10px;border-left:1px solid var(--line);height:100%;padding:0 22px;width:min(380px,48%);color:#9eb1b9}
+.search input{border:0;outline:0;font:inherit;font-size:15px;width:100%;background:none;color:var(--ink)}
+.pop{position:absolute;top:68px;left:14px;z-index:20;background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px;box-shadow:0 18px 40px #1f286033;display:grid;grid-template-columns:repeat(2,minmax(170px,1fr));gap:12px 14px;width:min(520px,94%)}
+.pop .full{grid-column:1/-1;display:flex;justify-content:flex-end;gap:8px}
+label.fl{display:flex;flex-direction:column;gap:5px;font-size:12px;font-weight:700;color:var(--muted)}
+input.in,select.in,textarea.in{font:inherit;font-size:14px;font-weight:500;color:var(--ink);border:1px solid #dde6ea;border-radius:10px;padding:10px 12px;background:#fff;width:100%;min-width:0;outline:0}
+input.in:focus,select.in:focus,textarea.in:focus{border-color:#9eb7c1;box-shadow:0 0 0 3px #7f8de026}
+/* table */
+.card{background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 2px 10px #2a368c0d}
+.tw{overflow:auto}
+table{border-collapse:collapse;width:100%;min-width:1060px}
+th{background:var(--head);text-align:left;font-size:13px;font-weight:700;color:#31454d;padding:18px 14px;white-space:nowrap;position:sticky;top:0}
+th .sb{background:none;border:0;padding:0;display:inline-flex;align-items:center;gap:6px;font-weight:700;color:inherit}
+th .sb svg{width:14px;height:14px;opacity:.7}
+td{padding:16px 14px;border-bottom:1px solid #f0f4f6;vertical-align:middle;font-size:14px}
+tr:last-child td{border-bottom:0}
+td:first-child,th:first-child{padding-left:20px}
+tbody tr{background:#fff}
+tbody tr.r-green{background:#B6D7A840}
+tbody tr.r-yellow{background:#FFE59959}
+tbody tr.r-red{background:#EA999947}
+tbody tr.r-green td:first-child,tbody tr.r-yellow td:first-child,tbody tr.r-red td:first-child,tbody tr.r-white td:first-child{box-shadow:inset 5px 0 0 var(--bar,#fff)}
+tbody tr.r-green{--bar:var(--c-green)}tbody tr.r-yellow{--bar:var(--c-yellow)}tbody tr.r-red{--bar:var(--c-red)}tbody tr.r-white{--bar:#dbe5e9}
+tbody tr:hover{filter:brightness(.985)}
+.vs{color:var(--link);font-weight:700;font-size:15px}
+.sub{color:var(--muted);font-size:12.5px;margin-top:2px}
+.strong{font-weight:700}
+.clamp{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.tags{display:flex;flex-wrap:wrap;gap:6px;max-width:250px}
+.tag{display:inline-block;border-radius:7px;padding:3px 9px;font-size:12.5px;font-weight:600;background:#e6ecef;color:#51727f;white-space:nowrap}
+.tag.white{background:#fff;color:#627780;box-shadow:inset 0 0 0 1px #d4dfe3}
+.tag.yellow{background:var(--c-yellow);color:#6b5000}
+.tag.green{background:var(--c-green);color:#25531c}
+.tag.red{background:var(--c-red);color:#7a1f1f}
+.tag.amber{background:#fdf0d6;color:#b47a12}
+.tag.ok{background:#d8f1dc;color:#2e8b3a}
+.tag.warn{background:#fde2dc;color:#b3402c}
+.tag.gray{background:#eef2f4;color:#627780}
+.chips{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.chip{display:inline-flex;align-items:center;gap:6px;background:#eef2f4;color:#4f707e;border-radius:999px;padding:4px 10px;font-size:12.5px;font-weight:700}
+.chip.sent{background:#d8f1dc;color:#2e7d37}
+.chip.ghost{background:#fff;color:#728e9a;border:1px dashed #becfd6;cursor:pointer}
+.chip.ghost:hover{background:#f5f7f8}
+.chip button{border:0;background:none;padding:0;display:grid;place-items:center;color:inherit;opacity:.7}
+.chip button:hover{opacity:1}
+.acts{display:flex;gap:8px;justify-content:flex-end}
+.ib{width:36px;height:36px;border-radius:50%;border:0;background:#f0f4f5;color:#71868f;display:grid;place-items:center}
+.ib:hover{background:#e4ebee;color:var(--navy)}
+.ib.ok{color:#2e8b3a}.ib.no{color:#b3402c}
+.empty{padding:50px 20px;text-align:center;color:var(--muted)}
+.pager{display:flex;align-items:center;justify-content:flex-end;gap:10px;padding:20px 8px 4px;flex-wrap:wrap;color:#859aa3;font-weight:600}
+.pager .pn{width:38px;height:38px;border-radius:50%;border:0;background:#fff;display:grid;place-items:center;font-weight:600;color:#385059;font-size:14px;box-shadow:0 1px 4px #2a368c14}
+.pager .pn.active{background:var(--navy);color:#fff}
+.pager .pn:disabled{opacity:.35}
+.pager select{border:0;background:#fff;border-radius:999px;height:38px;padding:0 12px;font:inherit;font-weight:600;color:#385059}
+.sel{width:18px;height:18px;accent-color:var(--navy)}
+/* dialogs */
+dialog{border:0;border-radius:18px;padding:0;width:min(860px,94vw);max-height:92vh;box-shadow:0 30px 90px #12185a55;color:var(--ink);font:inherit;overflow:hidden}
+dialog::backdrop{background:#161c4d77;backdrop-filter:blur(2px)}
+dialog[open]{display:flex;flex-direction:column}
+dialog.sm{width:min(520px,94vw)}
+dialog.lg{width:min(980px,95vw)}
+.dh{padding:22px 28px 16px;display:flex;justify-content:space-between;gap:12px;align-items:flex-start;border-bottom:1px solid var(--line)}
+.dh h2{margin:0;font-size:22px;font-weight:800}
+.dh p{margin:4px 0 0;color:var(--muted);font-size:13px}
+.db{padding:20px 28px;overflow:auto;flex:1;background:#fbfcfd}
+.df{padding:16px 28px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap;background:#fff}
+.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.grid .w2{grid-column:span 2}.grid .w4{grid-column:span 4}
+details.more{margin-top:18px;border:1px solid var(--line);border-radius:12px;background:#fff}
+details.more summary{padding:13px 16px;font-weight:700;cursor:pointer}
+details.more .grid{padding:4px 16px 16px}
+.note{background:#f3f6f8;border:1px solid #dfe7ea;color:#4f707e;border-radius:12px;padding:12px 14px;font-size:13px}
+.note.warn{background:#fff6e2;border-color:#f3dba3;color:#8a5d00}
+.sec{font-size:12px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);margin:0 0 10px}
+.mail{background:#fff;border:1px solid var(--line);border-radius:14px;margin-bottom:14px;overflow:hidden}
+.mail.done{border-color:#bfe3c5;background:#f6fcf7}
+.mail header{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 18px;flex-wrap:wrap}
+.mail h3{margin:0;font-size:17px;font-weight:800}
+.mail pre{margin:0;padding:14px 18px;background:#f8fafa;border-top:1px solid var(--line);font:13px/1.5 ui-monospace,Menlo,Consolas,monospace;white-space:pre-wrap;max-height:210px;overflow:auto;color:#354c55}
+.mail .row{display:flex;gap:8px;padding:12px 18px;border-top:1px solid var(--line);flex-wrap:wrap;align-items:center}
+.mail .to{display:flex;align-items:center;gap:8px;flex:1;min-width:230px}
+.pickl{display:flex;flex-direction:column;max-height:300px;overflow:auto;border:1px solid var(--line);border-radius:12px;background:#fff}
+.pickl label{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid #f2f6f7;cursor:pointer}
+.pickl label:hover{background:#f8fafb}
+.pickl label:last-child{border:0}
+.legend{display:grid;gap:10px}
+.legend div{display:flex;gap:12px;align-items:center}
+.sw{width:26px;height:26px;border-radius:8px;border:1px solid #0001;flex:none}
+#toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(20px);background:var(--navy);color:#fff;padding:12px 20px;border-radius:12px;font-weight:600;opacity:0;pointer-events:none;transition:.25s;z-index:100;max-width:90vw}
+#toast.show{opacity:1;transform:translateX(-50%)}
+.kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px}
+.panel{background:#fff;border-radius:14px;padding:22px;box-shadow:0 2px 10px #2a368c0d}
+.panel h3{margin:0 0 6px;font-size:17px;font-weight:800}
+.panel p{margin:0 0 14px;color:var(--muted);font-size:13px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+@media(max-width:900px){
+ body{padding:0}
+ .app{border-radius:0;grid-template-columns:1fr;grid-template-rows:auto 1fr;min-height:100vh}
+ .side{flex-direction:row;justify-content:center;padding:8px;border-right:0;border-bottom:1px solid #f0f4f6;gap:4px}
+ .logo{margin:0 10px 0 0;width:36px;height:36px}.sep{display:none}
+ .nav .tip{display:none}
+ .pagehead{padding:18px 16px}.pagehead h1{font-size:26px}.content{padding:18px 14px 30px}
+ .grid{grid-template-columns:repeat(2,minmax(0,1fr))}.grid .w4{grid-column:span 2}
+ .tops button span{display:none}.search{width:55%;padding:0 12px}
+ .btn{padding:10px 16px;font-size:14px}
+}
+</style></head><body>
+
+<svg width="0" height="0" style="position:absolute"><defs>
+<symbol id="i-bag" viewBox="0 0 24 24"><path d="M6 2 3 6v13a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><path d="M3 6h18"/><path d="m9 14 2 2 4-4"/></symbol>
+<symbol id="i-send" viewBox="0 0 24 24"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4z"/></symbol>
+<symbol id="i-truck" viewBox="0 0 24 24"><path d="M1 4h13v12H1z"/><path d="M14 8h4l4 4v4h-8"/><circle cx="5.5" cy="18.5" r="2"/><circle cx="17.5" cy="18.5" r="2"/></symbol>
+<symbol id="i-box" viewBox="0 0 24 24"><path d="M21 8 12 3 3 8v8l9 5 9-5z"/><path d="m3 8 9 5 9-5"/><path d="M12 13v8"/></symbol>
+<symbol id="i-db" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5"/><path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></symbol>
+<symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></symbol>
+<symbol id="i-eyeoff" viewBox="0 0 24 24"><path d="M3 3l18 18"/><path d="M10.6 6.1A10 10 0 0 1 12 5c6.5 0 10 7 10 7a17 17 0 0 1-3.2 4M6.5 6.9C3.8 8.7 2 12 2 12s3.5 7 10 7c1.6 0 3-.4 4.3-1"/></symbol>
+<symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 5 5L20 7"/></symbol>
+<symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+<symbol id="i-down" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+<symbol id="i-left" viewBox="0 0 24 24"><path d="m15 6-6 6 6 6"/></symbol>
+<symbol id="i-right" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></symbol>
+<symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></symbol>
+<symbol id="i-filter" viewBox="0 0 24 24"><path d="M4 6h16M7 12h10M10 18h4"/></symbol>
+<symbol id="i-pencil" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13.5 6.5 4 4"/></symbol>
+<symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></symbol>
+<symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+<symbol id="i-dl" viewBox="0 0 24 24"><path d="M12 3v12m-5-5 5 5 5-5M4 21h16"/></symbol>
+<symbol id="i-ul" viewBox="0 0 24 24"><path d="M12 15V3m-5 5 5-5 5 5M4 21h16"/></symbol>
+<symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.7.4-1 1-1 1.7M12 17h.01"/></symbol>
+<symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h8"/></symbol>
+<symbol id="i-mail" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></symbol>
+<symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.6-3.6 3.2-5.5 6.5-5.5s5.9 1.9 6.5 5.5"/><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8M18 14.8c2 .6 3.2 2.4 3.5 5.2"/></symbol>
+<linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff6a1f"/><stop offset="1" stop-color="#e44400"/></linearGradient>
+</defs></svg>
+
+<div class="app">
+ <aside class="side">
+  <svg class="logo" viewBox="0 0 44 44"><circle cx="22" cy="22" r="22" fill="url(#lg)"/><path d="M15 12.5 32 22 15 31.5l3-9.5z" fill="#fff"/></svg>
+  <button class="nav" data-act="go" data-v="compras" aria-label="Compras"><svg class="i"><use href="#i-bag"/></svg><span class="tip">Compras</span></button>
+  <button class="nav" data-act="go" data-v="cotizar" aria-label="Cotizar"><svg class="i"><use href="#i-send"/></svg><span class="tip">Cotizar pendientes</span><span class="dot hidden" id="navDot"></span></button>
+  <div class="sep"></div>
+  <button class="nav" data-act="go" data-v="proveedores" aria-label="Proveedores"><svg class="i"><use href="#i-truck"/></svg><span class="tip">Proveedores</span></button>
+  <button class="nav" data-act="go" data-v="materiales" aria-label="Materiales"><svg class="i"><use href="#i-box"/></svg><span class="tip">Materiales</span></button>
+  <div class="sep"></div>
+  <button class="nav" data-act="go" data-v="datos" aria-label="Datos"><svg class="i"><use href="#i-db"/></svg><span class="tip">Respaldo y ajustes</span></button>
+ </aside>
+ <div class="main">
+  <header class="topbar">
+   <div class="crumb"><span>Compras</span><svg class="i s sep2"><use href="#i-right"/></svg><span id="crumb">Registro</span></div>
+   <div class="tops">
+    <button data-act="exportCSV"><svg class="i"><use href="#i-dl"/></svg><span>Exportar CSV</span></button>
+    <button data-act="go" data-v="datos" id="cloudSt" title="Estado de la copia en la nube"><span>Nube: sin conectar</span></button><button data-act="go" data-v="datos"><svg class="i"><use href="#i-db"/></svg><span>Respaldo</span></button>
+    <button data-act="help"><svg class="i"><use href="#i-help"/></svg><span>Ayuda</span></button>
+   </div>
+  </header>
+  <div class="pagehead"><div><h1 id="pageTitle">Compras</h1><p id="pageSub"></p></div><div class="pact" id="pageActions"></div></div>
+  <div class="content" id="content"></div>
+ </div>
+</div>
+<dialog id="dlg"></dialog><dialog id="dlgPick" class="sm"></dialog><div id="toast"></div>
+
+<script>const SEED={"records":[],"suppliers":[],"materials":[],"settings":{"firma":""}};</script>
+<script>
+"use strict";
+const $=s=>document.querySelector(s);
+const norm=v=>String(v??"").trim().toLowerCase();
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const ic=(n,c="")=>`<svg class="i ${c}"><use href="#i-${n}"/></svg>`;
+const KEY="compras_cotizaciones_v2";
+const ST={white:{t:"Sin cotizar / en espera",s:"En espera"},yellow:{t:"OC emitida sin recepción",s:"OC emitida"},green:{t:"Comprado / recepcionado",s:"Comprado"},red:{t:"Anulado / rechazado",s:"Anulado"}};
+const COLS=[["VS","V/S"],["OP","OP"],["CANT","CANTIDAD"],["DESC","DESCRIPCION"],["OBS","OBSERVACIONES"],["PROV","PROVEEDOR"],["COT","MAT. COTIZADO"],["OC","OC"],["APR","APROBADO"],["ENTREGA","TIPO DE ENTREGA"],["SEDE","RECEPCIONADO EN"],["FECHA","RECIBIDO EL"],["NOTAS","NOTAS"]];
+
+/* ---------- datos ---------- */
+function load(){try{const x=localStorage.getItem(KEY);if(x){const d=JSON.parse(x);if(d&&Array.isArray(d.records))return d}}catch(e){}return JSON.parse(JSON.stringify(SEED))}
+let DB=load();
+const SEDES0=[{name:"Conchalí",dir:"Lanin 1637, Conchalí, Santiago de Chile"},{name:"Huechuraba",dir:"Avenida del Valle Sur 601, Oficina 32, Huechuraba, Santiago de Chile"},{name:"Quilicura",dir:"Las Esteras Sur 2400, Quilicura, Santiago de Chile"},{name:"Sede 4",dir:""}];
+function ensureSettings(){DB.settings=DB.settings||{firma:""};if(!Array.isArray(DB.settings.sedes)||!DB.settings.sedes.length)DB.settings.sedes=JSON.parse(JSON.stringify(SEDES0));
+ DB.suppliers.forEach(sp=>{if(sp.entrega===undefined){const c={};DB.records.forEach(r=>{if(r.PROV===sp.name&&(r.ENTREGA==="DESPACHO"||r.ENTREGA==="RETIRO"))c[r.ENTREGA]=(c[r.ENTREGA]||0)+1});const d=c.DESPACHO||0,t=c.RETIRO||0;sp.entrega=d>t?"DESPACHO":t>d?"RETIRO":""}})
+ if(!DB.settings.sedesSeeded){DB.settings.sedes.forEach(x=>{const d=SEDES0.find(y=>y.name===x.name);if(d&&!x.dir)x.dir=d.dir});DB.settings.sedesSeeded=true}}
+ensureSettings();
+const strip=s=>norm(s).normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+function sedeByName(n){return DB.settings.sedes.find(x=>strip(x.name)===strip(n))}
+function destOf(r){if(r.DEST&&sedeByName(r.DEST))return r.DEST;const s=sedeByName(r.OP);return s?s.name:""}
+const sedeTxt=n=>{const s=sedeByName(n);return s?(s.dir?`${s.name} – ${s.dir}`:s.name):""};
+function save(){try{localStorage.setItem(KEY,JSON.stringify(DB))}catch(e){toast("No se pudo guardar en este navegador. Descarga un respaldo.")}updateDot();cMark()}
+const byId=id=>DB.records.find(r=>r.id===id);
+const supByName=n=>DB.suppliers.find(s=>norm(s.name)===norm(n));
+const U={view:"compras",page:1,size:10,q:"",estado:"",hideRed:false,f:{prov:"",op:"",entrega:"",sede:""},sort:{k:"seq",d:-1},
+ cq:"",cfilter:"",cpage:1,sel:new Set(),sq:"",spage:1,mq:"",mpage:1};
+function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("show");clearTimeout(toast.h);toast.h=setTimeout(()=>t.classList.remove("show"),3200)}
+function today(){return new Date().toISOString().slice(0,10)}
+function fmtD(s){const m=/^(\d{4})-(\d\d)-(\d\d)/.exec(s||"");return m?`${m[3]}.${m[2]}.${m[1]}`:(s||"")}
+function autoEstado(r){const oc=norm(r.OC),ap=norm(r.APR),se=norm(r.SEDE);if(oc==="anulado"||ap==="anulado"||ap==="rechazado"||se==="anulado")return"red";if(r.FECHA||se)return"green";if(oc)return"yellow";return"white"}
+function pendientes(){return DB.records.filter(r=>r.estado==="white")}
+function pairsSent(){let n=0;DB.records.forEach(r=>{if(r.estado==="white")n+=Object.keys(r.enviados||{}).length});return n}
+function updateDot(){const n=pendientes().filter(r=>(r.asignados||[]).some(s=>!(r.enviados||{})[s])).length;const d=$("#navDot");d.textContent=n;d.classList.toggle("hidden",!n)}
+function lastSup(desc){const k=norm(desc);if(!k)return"";let best=null;DB.records.forEach(x=>{if(norm(x.DESC)===k&&x.PROV&&supByName(x.PROV)&&(!best||x.seq>best.seq))best=x});return best?best.PROV:""}
+function suggest(r){const k=norm(r.DESC),c={};DB.records.forEach(x=>{if(x!==r&&norm(x.DESC)===k&&x.PROV&&supByName(x.PROV))c[x.PROV]=(c[x.PROV]||0)+1});return Object.entries(c).sort((a,b)=>b[1]-a[1]).map(e=>e[0]).filter(n=>!(r.asignados||[]).includes(n)).slice(0,3)}
+
+/* ---------- navegación ---------- */
+const VIEWS={
+ compras:{t:"Compras",c:"Registro",sub:"Colores según el estado de cada material (igual que el Excel)"},
+ cotizar:{t:"Cotizar materiales",c:"Cotizar pendientes",sub:"Asigna uno o varios proveedores por material y genera un correo individual por proveedor"},
+ proveedores:{t:"Proveedores",c:"Proveedores",sub:"Correos de cotización de cada proveedor"},
+ materiales:{t:"Materiales",c:"Materiales",sub:"Catálogo de descripciones para autocompletar"},
+ datos:{t:"Respaldo y ajustes",c:"Respaldo",sub:"Los datos viven en este navegador: descarga un respaldo con frecuencia"}};
+function go(v){U.view=v;render()}
+function render(){
+ const V=VIEWS[U.view];$("#pageTitle").textContent=V.t;$("#crumb").textContent=V.c;$("#pageSub").textContent=V.sub;
+ document.querySelectorAll(".nav[data-v]").forEach(b=>b.classList.toggle("active",b.dataset.v===U.view));
+ ({compras:viewCompras,cotizar:viewCotizar,proveedores:viewProv,materiales:viewMat,datos:viewDatos})[U.view]();updateDot()}
+
+/* ---------- utilidades de tabla ---------- */
+function pager(total,page,size,key,sizes=true){
+ const pages=Math.max(1,Math.ceil(total/size)),a=total?(page-1)*size+1:0,b=Math.min(total,page*size);
+ let ps=[];for(let i=1;i<=pages;i++){if(i===1||i===pages||Math.abs(i-page)<=2)ps.push(i);else if(ps[ps.length-1]!=="…")ps.push("…")}
+ return `<div class="pager"><span>Mostrando ${a}-${b} de ${total}</span>
+ <button class="pn" ${page<=1?"disabled":""} data-act="pg" data-k="${key}" data-p="${page-1}" aria-label="Anterior">${ic("left","s")}</button>
+ ${ps.map(p=>p==="…"?"<span>…</span>":`<button class="pn ${p===page?"active":""}" data-act="pg" data-k="${key}" data-p="${p}">${p}</button>`).join("")}
+ <button class="pn" ${page>=pages?"disabled":""} data-act="pg" data-k="${key}" data-p="${page+1}" aria-label="Siguiente">${ic("right","s")}</button>
+ ${sizes?`<select data-bind="size" aria-label="Filas por página">${[10,25,50,100].map(n=>`<option ${n===size?"selected":""} value="${n}">${n} / pág.</option>`).join("")}</select>`:""}</div>`}
+function th(k,l){const on=U.sort.k===k;return `<th><button class="sb" data-act="sort" data-k="${k}">${l}${ic("down")}</button></th>`}
+function sortRecs(arr){const {k,d}=U.sort;return arr.slice().sort((a,b)=>{let x=a[k],y=b[k];if(k==="VS"){x=Number(x)||0;y=Number(y)||0;return(x-y)*d||(a.seq-b.seq)*d}if(k==="seq")return(x-y)*d;return String(x??"").localeCompare(String(y??""),"es")*d})}
+function chips(r,editable){const as=r.asignados||[];return as.map(s=>{const sent=(r.enviados||{})[s];return `<span class="chip ${sent?"sent":""}" title="${sent?"Enviado el "+fmtD(sent):"Pendiente de enviar"}">${sent?ic("check","s"):""}${esc(s)}${editable?`<button data-act="unassign" data-id="${r.id}" data-s="${esc(s)}" aria-label="Quitar">${ic("x","s")}</button>`:""}</span>`}).join("")}
+
+/* ---------- Compras ---------- */
+function counts(){const c={all:DB.records.length,white:0,yellow:0,green:0,red:0};DB.records.forEach(r=>c[r.estado]++);return c}
+function nFilters(){return Object.values(U.f).filter(Boolean).length}
+function viewCompras(){
+ $("#pageActions").innerHTML=`<button class="btn" data-act="go" data-v="cotizar">${ic("send")}Cotizar pendientes<span class="badge ${pendientes().length?"":"hidden"}">${pendientes().length}</span></button><button class="btn" data-act="copySheets" title="Copia las filas que estás viendo (con filtros) para pegarlas en Google Sheets">${ic("ul","s")}Copiar a Sheets</button><button class="btn green" data-act="newRec">${ic("bag")}Nueva solicitud</button>`;
+ const c=counts();const card=(k,l)=>`<button class="stat ${k} ${U.estado===(k==="all"?"":k)?"active":""}" data-act="estado" data-k="${k==="all"?"":k}"><span class="n">${c[k]}</span>${l}</button>`;
+ const ops=[...new Set(DB.records.map(r=>r.OP).filter(Boolean))].sort((a,b)=>String(a).localeCompare(String(b),"es",{numeric:true}));
+ const provs=[...new Set(DB.records.flatMap(r=>[r.PROV,...(r.asignados||[])]).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"es"));
+ const sel=(k,l,arr)=>`<label class="fl">${l}<select class="in" data-bind="f.${k}"><option value="">Todos</option>${arr.map(x=>`<option ${String(U.f[k])===String(x)?"selected":""}>${esc(x)}</option>`).join("")}</select></label>`;
+ $("#content").innerHTML=`
+ <div class="stats">${card("all","Todos")}${card("white","Sin cotizar / espera")}${card("yellow","OC sin recepción")}${card("green","Comprado / recep.")}${card("red","Anulado / rechazado")}</div>
+ <div class="bar"><button class="pill round ${U.hideRed?"":"off"}" data-act="hideRed" title="Ocultar anulados" aria-label="Ocultar anulados">${ic(U.hideRed?"eyeoff":"eye","s")}</button>
+  <button class="pill" data-act="togglePop">${ic("filter","s")}Filtros${nFilters()?` (${nFilters()})`:""}${ic("down","s")}</button>
+  <div class="pop hidden" id="pop">${sel("prov","Proveedor",provs)}${sel("op","OP asociada",ops)}${sel("entrega","Tipo de entrega",["DESPACHO","RETIRO"])}${sel("sede","Recepcionado en",["Conchalí","Huechuraba","Quilicura","Anulado"])}
+   <div class="full"><button class="btn sm" data-act="clearF">Limpiar filtros</button><button class="btn sm dark" data-act="togglePop">Listo</button></div></div>
+  <label class="search">${ic("search")}<input data-bind="q" placeholder="Buscar V/S, OP, material, proveedor, OC…" value="${esc(U.q)}"></label></div>
+ <div id="tableArea"></div>`;
+ fillCompras()}
+function filtered(){const q=norm(U.q),f=U.f;return DB.records.filter(r=>(!U.estado||r.estado===U.estado)&&(!U.hideRed||r.estado!=="red")&&(!f.prov||r.PROV===f.prov||(r.asignados||[]).includes(f.prov))&&(!f.op||String(r.OP)===f.op)&&(!f.entrega||r.ENTREGA===f.entrega)&&(!f.sede||r.SEDE===f.sede)&&(!q||[r.VS,r.OP,r.DESC,r.OBS,r.PROV,r.OC,r.CANT,r.NOTAS,...(r.asignados||[])].some(v=>norm(v).includes(q))))}
+function fillCompras(){
+ const arr=sortRecs(filtered()),pages=Math.max(1,Math.ceil(arr.length/U.size));if(U.page>pages)U.page=pages;
+ const rows=arr.slice((U.page-1)*U.size,U.page*U.size);
+ $("#tableArea").innerHTML=`<div class="card"><div class="tw"><table><thead><tr>${th("VS","V/S / OP")}${th("estado","Estado")}${th("DESC","Material")}${th("CANT","Cant.")}${th("PROV","Proveedor")}${th("OC","OC / Aprobado")}${th("FECHA","Recepción")}<th style="text-align:right">Acción</th></tr></thead><tbody>
+ ${rows.map(r=>`<tr class="r-${r.estado}">
+  <td><div class="vs">${esc(r.VS||"—")}</div><div class="sub">${esc(r.OP||"")}</div></td>
+  <td><div class="tags"><span class="tag ${r.estado}">${ST[r.estado].s}</span>${r.COT?`<span class="tag ${norm(r.COT)==="si"?"ok":norm(r.COT)==="no"?"warn":"amber"}">Cotizado: ${esc(r.COT==="ESPERA DE RESPUESTA"?"en espera":r.COT)}</span>`:""}${r.ENTREGA?`<span class="tag">${esc(r.ENTREGA)}</span>`:""}</div></td>
+  <td style="min-width:250px"><div class="strong clamp">${esc(r.DESC)}</div>${r.OBS?`<div class="sub clamp">${esc(r.OBS)}</div>`:""}</td>
+  <td class="strong">${esc(r.CANT)}</td>
+  <td>${r.PROV?`<div class="strong">${esc(r.PROV)}</div>`:""}${(r.asignados||[]).length&&!r.PROV?`<div class="chips">${chips(r)}</div>`:""}${!r.PROV&&!(r.asignados||[]).length?`<span class="sub">Sin asignar</span>`:""}</td>
+  <td>${r.OC?`<div class="strong">${esc(r.OC)}</div>`:""}<div class="sub">${esc(r.APR||"")}</div>${r.ocEnviada?`<div style="margin-top:4px"><span class="tag ok">OC enviada ${fmtD(r.ocEnviada)}</span></div>`:""}</td>
+  <td>${r.SEDE?`<div class="strong">${esc(r.SEDE)}</div>`:""}<div class="sub">${fmtD(r.FECHA)}</div></td>
+  <td><div class="acts"><button class="ib" data-act="edit" data-id="${r.id}" title="Ver / editar">${ic("eye","s")}</button>${r.OC&&r.PROV&&r.estado!=="red"?`<button class="ib ok" data-act="sendOC" data-id="${r.id}" title="Enviar orden de compra al proveedor">${ic("send","s")}</button>`:`<button class="ib ok" data-act="quote1" data-id="${r.id}" title="Cotizar por correo">${ic("mail","s")}</button>`}<button class="ib no" data-act="del" data-id="${r.id}" title="Eliminar">${ic("trash","s")}</button></div></td></tr>`).join("")}
+ </tbody></table></div>${rows.length?"":`<div class="empty">No hay registros con esos filtros.</div>`}</div>${pager(arr.length,U.page,U.size,"page")}`}
+
+/* ---------- Cotizar ---------- */
+function cotizarList(){const q=norm(U.cq);return pendientes().filter(r=>{const as=r.asignados||[];const f=U.cfilter;
+ if(f==="sin"&&as.length)return false;if(f==="listos"&&!as.some(s=>!(r.enviados||{})[s]))return false;if(f==="enviados"&&!Object.keys(r.enviados||{}).length)return false;
+ return !q||[r.VS,r.OP,r.DESC,r.OBS,...as].some(v=>norm(v).includes(q))}).sort((a,b)=>b.seq-a.seq)}
+function viewCotizar(){
+ const P=pendientes(),sin=P.filter(r=>!(r.asignados||[]).length).length,listos=P.filter(r=>(r.asignados||[]).some(s=>!(r.enviados||{})[s])).length,env=P.filter(r=>Object.keys(r.enviados||{}).length).length;
+ const ready=[...U.sel].filter(id=>byId(id)&&byId(id).estado==="white").length;
+ $("#pageActions").innerHTML=`<button class="btn" data-act="newRec">${ic("plus")}Nueva solicitud</button><button class="btn" data-act="bulkAssign" id="bulkBtn" ${ready?"":"disabled"}>${ic("users")}Asignar proveedores${ready?` (${ready})`:""}</button><button class="btn green" data-act="prepare">${ic("mail")}Preparar correos</button>`;
+ const card=(k,l,n)=>`<button class="stat ${k==="listos"?"yellow":k==="sin"?"white":k==="enviados"?"green":"all"} ${U.cfilter===k?"active":""}" data-act="cfilter" data-k="${k}"><span class="n">${n}</span>${l}</button>`;
+ $("#content").innerHTML=`<div class="stats">${card("","Pendientes",P.length)}${card("sin","Sin proveedor",sin)}${card("listos","Listos para enviar",listos)}${card("enviados","Con correo enviado",env)}</div>
+ <div class="bar"><label class="search" style="border:0;margin:0;width:100%">${ic("search")}<input data-bind="cq" placeholder="Buscar material, V/S, OP o proveedor…" value="${esc(U.cq)}"></label></div>
+ <div id="cArea"></div>`;fillCotizar()}
+function fillCotizar(){
+ const arr=cotizarList(),size=15,pages=Math.max(1,Math.ceil(arr.length/size));if(U.cpage>pages)U.cpage=pages;const rows=arr.slice((U.cpage-1)*size,U.cpage*size);
+ const allSel=rows.length&&rows.every(r=>U.sel.has(r.id));
+ $("#cArea").innerHTML=`<div class="note" style="margin-bottom:16px">Cada proveedor recibe <b>su propio correo</b> (nunca masivo) con la lista de los materiales que le asignaste. Sin selección se incluyen todos los pendientes con proveedor asignado.</div>
+ <div class="card"><div class="tw"><table><thead><tr><th style="width:44px"><input class="sel" type="checkbox" data-act="selAll" ${allSel?"checked":""} aria-label="Seleccionar todos"></th><th>V/S / OP</th><th>Material</th><th>Cant.</th><th>Proveedores a cotizar</th><th style="text-align:right">Acción</th></tr></thead><tbody>
+ ${rows.map(r=>{const sg=suggest(r);return `<tr class="r-white"><td><input class="sel" type="checkbox" data-act="sel" data-id="${r.id}" ${U.sel.has(r.id)?"checked":""}></td>
+ <td><div class="vs">${esc(r.VS||"—")}</div><div class="sub">${esc(r.OP||"")}</div></td>
+ <td style="min-width:240px"><div class="strong clamp">${esc(r.DESC)}</div>${r.OBS?`<div class="sub clamp">${esc(r.OBS)}</div>`:""}</td><td class="strong">${esc(r.CANT)}</td>
+ <td><div class="chips">${chips(r,true)}${sg.map(s=>`<span class="chip ghost" data-act="assignOne" data-id="${r.id}" data-s="${esc(s)}" title="Usado antes para este material">+ ${esc(s)}</span>`).join("")}${!(r.asignados||[]).length&&!sg.length?`<span class="sub">Sin proveedor</span>`:""}</div></td>
+ <td><div class="acts"><button class="ib" data-act="pick1" data-id="${r.id}" title="Asignar proveedores">${ic("users","s")}</button><button class="ib" data-act="edit" data-id="${r.id}" title="Editar">${ic("pencil","s")}</button><button class="ib ok" data-act="quote1" data-id="${r.id}" title="Correo de este material">${ic("mail","s")}</button></div></td></tr>`}).join("")}
+ </tbody></table></div>${rows.length?"":`<div class="empty">No hay materiales pendientes de cotizar. 🎉<br>Crea una nueva solicitud para empezar.</div>`}</div>${pager(arr.length,U.cpage,size,"cpage",false)}`;
+ const b=$("#bulkBtn");if(b){const n=[...U.sel].filter(id=>byId(id)&&byId(id).estado==="white").length;b.disabled=!n;b.innerHTML=`${ic("users")}Asignar proveedores${n?` (${n})`:""}`}}
+
+/* ---------- correos individuales por proveedor ---------- */
+function buildGroups(ids,resend){const g=new Map(),sin=[];ids.forEach(id=>{const r=byId(id);if(!r)return;const as=r.asignados||[];if(!as.length){sin.push(r);return}as.forEach(s=>{if(!resend&&(r.enviados||{})[s])return;if(!g.has(s))g.set(s,[]);g.get(s).push(r)})});return{g,sin}}
+function emailText(items,sn){const mode=(supByName(sn)||{}).entrega||"",one=items.length===1;let t=`Estimados,\n\nJunto con saludar, solicito cotizar ${one?"el siguiente material":"los siguientes materiales"}:\n\n`;
+ const dests=[...new Set(items.map(destOf))],same=mode==="DESPACHO"&&dests.length===1&&dests[0];
+ t+=items.map((r,i)=>{const p=one?"":"   ",h=one?"":`${i+1}) `;return `${h}Material: ${r.DESC}\n${p}Cantidad: ${r.CANT}`+(r.OBS?`\n${p}Observaciones: ${r.OBS}`:"")+(mode==="DESPACHO"&&!same&&destOf(r)?`\n${p}Dirección de despacho: ${sedeTxt(destOf(r))}`:"")}).join("\n\n");
+ t+=`\n\nAgradeceré indicar precio, disponibilidad y plazo de entrega.`;
+ if(same)t+=`\n\nEl despacho debe realizarse a la siguiente dirección: ${sedeTxt(dests[0])}`;
+ else if(mode==="RETIRO")t+=`\n\nEl retiro lo realizaremos nosotros en sus instalaciones.`;
+ t+=`\n\nSaludos.`;if(DB.settings.firma)t+=`\n${DB.settings.firma}`;return t}
+const subjectFor=items=>{const v=[...new Set(items.map(r=>r.VS).filter(x=>x!==""&&x!=null))];return "Solicitud de cotización de materiales"+(v.length?` · V/S ${v.slice(0,6).join(" / ")}${v.length>6?"…":""}`:"")};
+let MAILS=null;
+function openPrepare(ids,resend){
+ MAILS={ids,resend:!!resend};const {g,sin}=buildGroups(ids,resend);MAILS.g=g;MAILS.sin=sin;
+ const n=g.size;const dlg=$("#dlg");dlg.className="lg";
+ dlg.innerHTML=`<div class="dh"><div><h2>Correos a enviar</h2><p>${n} correo${n===1?"":"s"} individual${n===1?"":"es"} · cada proveedor recibe solo el suyo, sin copiar a los demás</p></div><button class="ib" data-act="closeDlg" aria-label="Cerrar">${ic("x","s")}</button></div>
+ <div class="db">${sin.length?`<div class="note warn" style="margin-bottom:14px"><b>${sin.length} material${sin.length===1?"":"es"} sin proveedor asignado</b> (no se incluyen): ${sin.slice(0,4).map(r=>esc(r.DESC)).join(", ")}${sin.length>4?"…":""}</div>`:""}
+ ${n?"":`<div class="empty">No hay correos por enviar.<br>Asigna proveedores a los materiales pendientes (los ya enviados no se repiten).</div>`}
+ <div id="mails">${[...g.keys()].map(mailCard).join("")}</div></div>
+ <div class="df"><label class="row" style="margin-right:auto;font-size:13px;color:var(--muted);font-weight:600"><input type="checkbox" class="sel" data-act="resend" ${resend?"checked":""}>Incluir ya enviados (reenviar)</label>${n?`<button class="btn" data-act="markAll">${ic("check")}Marcar todos como enviados</button>`:""}<button class="btn dark" data-act="closeDlg">Cerrar</button></div>`;
+ if(!dlg.open)dlg.showModal()}
+function mailCard(s){const items=MAILS.g.get(s),sup=supByName(s)||{name:s,email:""},body=emailText(items,s),done=items.every(r=>(r.enviados||{})[s]);
+ return `<div class="mail ${done?"done":""}" data-s="${esc(s)}"><header><div><h3>${esc(s)}</h3><div class="sub">${items.length} material${items.length===1?"":"es"} · Asunto: ${esc(subjectFor(items))}</div></div>${done?`<span class="tag ok">${ic("check","s")} Enviado</span>`:`<span class="tag amber">Pendiente</span>`}</header>
+ <div class="row"><div class="to"><span class="sub" style="margin:0">Para:</span><input class="in" type="email" data-bind="supmail" data-s="${esc(s)}" placeholder="correo del proveedor (separa varios con coma)" value="${esc(sup.email||"")}"></div>
+  <div class="to" style="flex:0 1 190px"><span class="sub" style="margin:0">Entrega:</span><select class="in" data-bind="ment" data-s="${esc(s)}"><option value="">Sin definir</option><option value="DESPACHO" ${sup.entrega==="DESPACHO"?"selected":""}>Despacha</option><option value="RETIRO" ${sup.entrega==="RETIRO"?"selected":""}>Retiramos</option></select></div>
+  ${sup.entrega==="DESPACHO"?`<div class="to" style="flex:0 1 300px"><span class="sub" style="margin:0;white-space:nowrap">Despacho a:</span><select class="in" data-bind="mdest" data-s="${esc(s)}">${destOpts(items)}</select><button class="btn xs" data-act="sedes" title="Editar direcciones">${ic("pencil","s")}</button></div>`:""}</div>
+ ${(()=>{if(sup.entrega!=="DESPACHO")return"";const ds=[...new Set(items.map(destOf))].filter(Boolean);const miss=ds.filter(n=>!(sedeByName(n)||{}).dir);return miss.length?`<div class="row" style="padding:0 18px 12px"><span class="tag amber">Falta la dirección de ${esc(miss.join(", "))} · complétala en Respaldo y ajustes</span></div>`:""})()}
+ <pre>${esc(body)}</pre>
+ <div class="row"><button class="btn sm dark" data-act="openMail" data-s="${esc(s)}">${ic("mail","s")}Abrir en Outlook</button><button class="btn sm" data-act="copyMail" data-s="${esc(s)}">${ic("copy","s")}Copiar texto</button><button class="btn sm" data-act="emlMail" data-s="${esc(s)}">${ic("dl","s")}Descargar .eml</button><button class="btn sm green" data-act="sentMail" data-s="${esc(s)}" style="margin-left:auto" ${done?"disabled":""}>${ic("check","s")}Marcar enviado</button></div></div>`}
+function sedesDialog(){const d=$("#dlgPick");
+ d.innerHTML=`<div class="dh"><div><h2>Sedes y direcciones</h2><p>Se usan en el correo cuando el proveedor despacha</p></div><button class="ib" data-act="closePick" aria-label="Cerrar">${ic("x","s")}</button></div><div class="db" style="display:grid;gap:12px">${DB.settings.sedes.map((x,i)=>`<div style="display:grid;gap:6px"><input class="in strong" data-sede="${i}" data-f="name" value="${esc(x.name)}" placeholder="Nombre de la sede"><input class="in" data-sede="${i}" data-f="dir" value="${esc(x.dir)}" placeholder="Dirección completa"></div>`).join("")}</div><div class="df"><button class="btn green" data-act="closePick">Listo</button></div>`;
+ d.querySelectorAll("[data-sede]").forEach(i=>i.oninput=()=>{DB.settings.sedes[i.dataset.sede][i.dataset.f]=i.value;save()});
+ d.onclose=()=>{d.onclose=null;if(MAILS&&$("#dlg").open)openPrepare(MAILS.ids,MAILS.resend);if(U.view==="datos")viewDatos()};d.showModal()}
+function destOpts(items){const ds=[...new Set(items.map(destOf))];const cur=ds.length===1?ds[0]:"__mix";return (ds.length>1?`<option value="__mix" selected>Varias sedes</option>`:"")+`<option value="" ${cur===""?"selected":""}>Sin definir</option>`+DB.settings.sedes.map(x=>`<option ${x.name===cur?"selected":""} value="${esc(x.name)}">${esc(x.name)}</option>`).join("")}
+function mailURL(s){const items=MAILS.g.get(s),to=(supByName(s)?.email||"").split(/[;,]\s*/).filter(Boolean).join(",");return`mailto:${to}?subject=${encodeURIComponent(subjectFor(items))}&body=${encodeURIComponent(emailText(items,s).replace(/\n/g,"\r\n"))}`}
+function download(content,name,type){const b=new Blob([content],{type}),a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),2000)}
+function b64(s){const by=new TextEncoder().encode(s);let x="";for(let i=0;i<by.length;i+=0x8000)x+=String.fromCharCode.apply(null,by.subarray(i,i+0x8000));return btoa(x)}
+function emlFor(s){const items=MAILS.g.get(s),to=(supByName(s)?.email||"").split(/[;,]\s*/).filter(Boolean).join(", ");
+ const wrap=t=>t.replace(/(.{76})/g,"$1\r\n");return["To: "+to,"Subject: =?UTF-8?B?"+b64(subjectFor(items))+"?=","X-Unsent: 1","MIME-Version: 1.0","Content-Type: text/plain; charset=UTF-8","Content-Transfer-Encoding: base64","",wrap(b64(emailText(items,s).replace(/\n/g,"\r\n")))].join("\r\n")}
+function markSent(s){MAILS.g.get(s).forEach(r=>{r.enviados=r.enviados||{};r.enviados[s]=today();if(!r.COT)r.COT="ESPERA DE RESPUESTA";if(!r.ENTREGA&&(supByName(s)||{}).entrega)r.ENTREGA=supByName(s).entrega});save()}
+function refreshMail(s){const el=document.querySelector(`.mail[data-s="${CSS.escape(s)}"]`);if(el)el.outerHTML=mailCard(s);if(U.view==="cotizar")fillCotizar();else if(U.view==="compras")fillCompras()}
+
+/* ---------- correo de Orden de Compra (con adjunto) ---------- */
+let OCM=null;
+const wrap76=t=>t.replace(/(.{76})/g,"$1\r\n");
+function ocGroup(r){return DB.records.filter(x=>x.OC&&String(x.OC)===String(r.OC)&&x.PROV===r.PROV)}
+function emailTextOC(){const {items,entrega,dest}=OCM,one=items.length===1;
+ let t=`Estimados,\n\nJunto con saludar, adjunto la Orden de Compra N° ${items[0].OC} correspondiente ${one?"al siguiente material":"a los siguientes materiales"}:\n\n`;
+ t+=items.map((r,i)=>`${one?"":(i+1)+") "}Material: ${r.DESC}\n${one?"":"   "}Cantidad: ${r.CANT}`).join("\n\n");
+ if(entrega==="DESPACHO")t+=dest?`\n\nLa entrega es con despacho a la siguiente dirección: ${sedeTxt(dest)}`:`\n\nLa entrega es con despacho.`;
+ else if(entrega==="RETIRO")t+=`\n\nLa entrega es con retiro por nuestra parte; agradeceré indicar cuándo podemos retirar.`;
+ t+=`\n\nAgradeceré confirmar la recepción de la orden y la fecha de entrega.\n\nSaludos.`;if(DB.settings.firma)t+=`\n${DB.settings.firma}`;return t}
+function subjectOC(){const v=[...new Set(OCM.items.map(r=>r.VS).filter(x=>x!==""&&x!=null))];return `Orden de Compra N° ${OCM.items[0].OC}`+(v.length?` · V/S ${v.slice(0,6).join(" / ")}`:"")}
+const ocTo=()=>(supByName(OCM.items[0].PROV)?.email||"").split(/[;,]\s*/).filter(Boolean).join(",");
+function openOC(id){const r=byId(id);if(!r)return;const items=ocGroup(r);
+ OCM={items,files:[],entrega:(supByName(items[0].PROV)||{}).entrega||items[0].ENTREGA||"",dest:destOf(items[0])};
+ const dlg=$("#dlg");dlg.className="";const prov=items[0].PROV;
+ dlg.innerHTML=`<div class="dh"><div><h2>Enviar orden de compra</h2><p>OC N° ${esc(items[0].OC)} · ${esc(prov)} · ${items.length} material${items.length===1?"":"es"}</p></div><button class="ib" data-act="closeDlg" aria-label="Cerrar">${ic("x","s")}</button></div>
+ <div class="db"><div class="grid">
+  ${fld("","Para (correo del proveedor)",`<input class="in" id="ocTo" type="email" value="${esc(supByName(prov)?.email||"")}" placeholder="correo@proveedor.cl">`,"w4")}
+  ${fld("","Entrega",`<select class="in" id="ocEnt"><option value=""></option><option ${OCM.entrega==="DESPACHO"?"selected":""} value="DESPACHO">Despacho</option><option ${OCM.entrega==="RETIRO"?"selected":""} value="RETIRO">Retiro</option></select>`,"w2")}
+  <label class="fl w2" id="ocDestW">Dirección de despacho<select class="in" id="ocDest"><option value=""></option>${DB.settings.sedes.map(x=>`<option ${x.name===OCM.dest?"selected":""} value="${esc(x.name)}">${esc(x.name)}</option>`).join("")}</select></label>
+  <div class="w4"><div class="sec" style="margin:4px 0 8px">Documento adjunto (OC en PDF)</div><div class="row"><label class="btn sm" style="cursor:pointer">${ic("ul","s")}Elegir archivo(s)<input type="file" id="ocFile" multiple hidden></label><div class="chips" id="ocList"></div></div></div>
+ </div>
+ <div class="sec" style="margin:18px 0 8px">Vista previa · Asunto: <span id="ocSub" style="text-transform:none;letter-spacing:0"></span></div>
+ <div class="mail" style="margin:0"><pre id="ocPre" style="border-top:0;max-height:280px"></pre></div>
+ <div class="note" style="margin-top:14px">Outlook no permite adjuntar archivos desde un enlace. Elige el PDF y usa <b>Descargar borrador con adjunto</b>: al abrir el .eml se crea el correo con el documento ya adjunto, listo para enviar.</div></div>
+ <div class="df"><button class="btn" data-act="ocCopy">${ic("copy","s")}Copiar texto</button><button class="btn" data-act="ocMailto">${ic("mail","s")}Abrir sin adjunto</button><button class="btn dark" data-act="ocEml">${ic("dl","s")}Descargar borrador con adjunto</button><button class="btn green" data-act="ocSent">${ic("check","s")}Marcar OC enviada</button></div>`;
+ $("#ocTo").onchange=e=>{const s=supByName(prov);if(s){s.email=e.target.value.trim()}else DB.suppliers.push({name:prov,email:e.target.value.trim(),phone:""});save()};
+ $("#ocEnt").onchange=e=>{OCM.entrega=e.target.value;OCM.items.forEach(r=>r.ENTREGA=OCM.entrega);save();updOC()};
+ $("#ocDest").onchange=e=>{OCM.dest=e.target.value;OCM.items.forEach(r=>r.DEST=OCM.dest);save();updOC()};
+ $("#ocFile").onchange=e=>{OCM.files=[...OCM.files,...e.target.files];e.target.value="";updOC()};
+ updOC();dlg.showModal()}
+function updOC(){$("#ocDestW").classList.toggle("hidden",OCM.entrega!=="DESPACHO");$("#ocPre").textContent=emailTextOC();$("#ocSub").textContent=subjectOC();
+ $("#ocList").innerHTML=OCM.files.map((f,i)=>`<span class="chip">${esc(f.name)}<button data-act="ocRm" data-i="${i}" aria-label="Quitar">${ic("x","s")}</button></span>`).join("")||`<span class="sub">Ningún archivo elegido</span>`}
+async function emlOC(){const body=emailTextOC().replace(/\n/g,"\r\n"),subj=subjectOC(),bd="----=_oc"+Date.now().toString(36),to=($("#ocTo").value||ocTo()).split(/[;,]\s*/).filter(Boolean).join(", ");
+ const p=["To: "+to,"Subject: =?UTF-8?B?"+b64(subj)+"?=","X-Unsent: 1","MIME-Version: 1.0",`Content-Type: multipart/mixed; boundary="${bd}"`,"",`--${bd}`,"Content-Type: text/plain; charset=UTF-8","Content-Transfer-Encoding: base64","",wrap76(b64(body)),""];
+ for(const f of OCM.files){const ab=new Uint8Array(await f.arrayBuffer());let x="";for(let i=0;i<ab.length;i+=0x8000)x+=String.fromCharCode.apply(null,ab.subarray(i,i+0x8000));const nm=f.name.replace(/[^\x20-\x7e]/g,"_").replace(/"/g,"'");
+  p.push(`--${bd}`,`Content-Type: ${f.type||"application/octet-stream"}; name="${nm}"`,"Content-Transfer-Encoding: base64",`Content-Disposition: attachment; filename="${nm}"; filename*=UTF-8''${encodeURIComponent(f.name)}`,"",wrap76(btoa(x)),"")}
+ p.push(`--${bd}--`,"");return p.join("\r\n")}
+
+/* ---------- selector de proveedores ---------- */
+function pickSuppliers({title,sub,selected=[],suggestions=[],onOk}){
+ const d=$("#dlgPick");let sel=new Set(selected);
+ const draw=()=>{const q=norm(d.querySelector("[data-pq]")?.value||"");const list=DB.suppliers.slice().sort((a,b)=>(sel.has(b.name)-sel.has(a.name))||a.name.localeCompare(b.name,"es")).filter(s=>!q||norm(s.name).includes(q));
+  d.querySelector("#pl").innerHTML=list.map(s=>`<label><input type="checkbox" class="sel" value="${esc(s.name)}" ${sel.has(s.name)?"checked":""}><span class="strong">${esc(s.name)}</span>${s.email?"":`<span class="tag amber" style="margin-left:auto">sin correo</span>`}</label>`).join("")||`<div class="empty" style="padding:20px">Sin resultados</div>`;
+  d.querySelectorAll("#pl input").forEach(i=>i.onchange=()=>{i.checked?sel.add(i.value):sel.delete(i.value)})};
+ d.innerHTML=`<div class="dh"><div><h2>${esc(title)}</h2><p>${esc(sub||"")}</p></div><button class="ib" data-act="closePick" aria-label="Cerrar">${ic("x","s")}</button></div>
+ <div class="db">${suggestions.length?`<div class="sec">Usados antes para este material</div><div class="chips" style="margin-bottom:16px">${suggestions.map(s=>`<span class="chip ghost" data-sg="${esc(s)}">+ ${esc(s)}</span>`).join("")}</div>`:""}
+ <input class="in" data-pq placeholder="Buscar proveedor…" style="margin-bottom:10px"><div class="pickl" id="pl"></div>
+ <div class="sec" style="margin-top:18px">Nuevo proveedor</div><div class="row"><input class="in" id="npn" placeholder="Nombre" style="flex:1;min-width:140px"><input class="in" id="npe" placeholder="Correo" type="email" style="flex:1;min-width:160px"><button class="btn sm dark" id="npa" type="button">${ic("plus","s")}Agregar</button></div></div>
+ <div class="df"><button class="btn" data-act="closePick">Cancelar</button><button class="btn green" id="pok">Aceptar</button></div>`;
+ draw();d.querySelector("[data-pq]").oninput=draw;
+ d.querySelectorAll("[data-sg]").forEach(c=>c.onclick=()=>{sel.add(c.dataset.sg);c.remove();draw()});
+ d.querySelector("#npa").onclick=()=>{const n=d.querySelector("#npn").value.trim().toUpperCase();if(!n)return;if(!supByName(n))DB.suppliers.push({name:n,email:d.querySelector("#npe").value.trim(),phone:"",entrega:""});sel.add(supByName(n).name);d.querySelector("#npn").value="";d.querySelector("#npe").value="";save();draw()};
+ d.querySelector("#pok").onclick=()=>{d.close();onOk([...sel])};
+ if(!d.open)d.showModal()}
+function pickFor(ids,replace){
+ const rs=ids.map(byId).filter(Boolean);if(!rs.length)return;
+ const one=rs.length===1?rs[0]:null;
+ pickSuppliers({title:"Asignar proveedores",sub:one?one.DESC:`Se agregarán a ${rs.length} materiales seleccionados`,selected:one?(one.asignados||[]):[],suggestions:one?suggest(one):[],
+  onOk:list=>{rs.forEach(r=>{r.asignados=replace||one?list:[...new Set([...(r.asignados||[]),...list])]});save();toast("Proveedores asignados");render()}})}
+
+/* ---------- formulario de solicitud ---------- */
+let FORM=null;
+function fld(k,l,inner,cls=""){return `<label class="fl ${cls}">${l}${inner}</label>`}
+function openForm(id){
+ const r=id?byId(id):{id:null,VS:"",OP:"",CANT:"",DESC:"",OBS:"",PROV:"",COT:"",OC:"",APR:"",ENTREGA:"",SEDE:"",FECHA:"",NOTAS:"",estado:"white",asignados:[],enviados:{}};
+ FORM={id,asignados:[...(r.asignados||[])],touched:false,auto:false,autoFrom:""};
+ const opt=(arr,v)=>`<option value=""></option>${arr.map(x=>`<option ${x===v?"selected":""}>${esc(x)}</option>`).join("")}`;
+ const dlg=$("#dlg");dlg.className="";
+ dlg.innerHTML=`<form id="rf" method="dialog" style="display:flex;flex-direction:column;min-height:0;flex:1"><div class="dh"><div><h2>${id?"Editar solicitud":"Nueva solicitud"}</h2><p>${id?"Actualiza datos, proveedor, OC y recepción":"Material a cotizar y proveedores que recibirán el correo"}</p></div><button type="button" class="ib" data-act="closeDlg" aria-label="Cerrar">${ic("x","s")}</button></div>
+ <div class="db"><div class="grid">
+  ${fld("DESC","Material *",`<input class="in" name="DESC" list="dlMat" required value="${esc(r.DESC)}" autocomplete="off"><datalist id="dlMat">${DB.materials.map(m=>`<option value="${esc(m.name)}">`).join("")}</datalist>`,"w4")}
+  ${fld("CANT","Cantidad",`<input class="in" name="CANT" value="${esc(r.CANT)}">`)}
+  ${fld("VS","V/S",`<input class="in" name="VS" value="${esc(r.VS)}">`)}
+  ${fld("OP","OP asociada",`<input class="in" name="OP" value="${esc(r.OP)}">`,"w2")}
+  ${fld("DEST","Despacho a (sede)",`<select class="in" name="DEST"><option value=""></option>${DB.settings.sedes.map(x=>`<option ${x.name===destOf(r)?"selected":""}>${esc(x.name)}</option>`).join("")}</select>`,"w2")}
+  ${fld("OBS","Observaciones",`<input class="in" name="OBS" value="${esc(r.OBS)}">`,"w2")}
+  <div class="w4"><div class="sec" style="margin:4px 0 8px">Proveedores a cotizar</div><div class="row"><div class="chips" id="fch"></div><button type="button" class="btn xs" data-act="formPick">${ic("users","s")}Asignar proveedores</button></div><div class="sub" id="fhint" style="margin-top:6px"></div></div>
+ </div>
+ <details class="more" ${id?"open":""}><summary>Seguimiento de la compra</summary><div class="grid">
+  ${fld("PROV","Proveedor elegido",`<input class="in" name="PROV" list="dlSup" value="${esc(r.PROV)}"><datalist id="dlSup">${DB.suppliers.map(s=>`<option value="${esc(s.name)}">`).join("")}</datalist>`,"w2")}
+  ${fld("COT","Mat. cotizado",`<select class="in" name="COT">${opt(["SI","ESPERA DE RESPUESTA","NO"],r.COT)}</select>`,"w2")}
+  ${fld("OC","OC",`<input class="in" name="OC" value="${esc(r.OC)}">`)}
+  ${fld("APR","Aprobado",`<select class="in" name="APR">${opt(["SI","EN CURSO","ANULADO","RECHAZADO"],r.APR)}</select>`)}
+  ${fld("ENTREGA","Tipo de entrega",`<select class="in" name="ENTREGA">${opt(["DESPACHO","RETIRO"],r.ENTREGA)}</select>`)}
+  ${fld("SEDE","Recepcionado en",`<select class="in" name="SEDE">${opt(["Conchalí","Huechuraba","Quilicura","Anulado","Otro"],r.SEDE)}</select>`)}
+  ${fld("FECHA","Recibido el",`<input class="in" type="date" name="FECHA" value="${esc(r.FECHA)}">`,"w2")}
+  ${fld("estado","Color / estado",`<select class="in" name="estado">${Object.entries(ST).map(([k,v])=>`<option value="${k}" ${k===r.estado?"selected":""}>${v.t}</option>`).join("")}</select>`,"w2")}
+  ${fld("NOTAS","Notas",`<input class="in" name="NOTAS" value="${esc(r.NOTAS)}">`,"w4")}
+ </div></details></div>
+ <div class="df"><button type="button" class="btn" data-act="closeDlg">Cancelar</button><button type="submit" class="btn green">${ic("check")}Guardar</button></div></form>`;
+ const f=$("#rf");drawFormChips();
+ if(!id)f.elements.DESC.addEventListener("input",()=>{const sp=lastSup(f.elements.DESC.value.trim());if(sp&&(FORM.auto||!FORM.asignados.length)){FORM.asignados=[sp];FORM.auto=true;FORM.autoFrom=sp}else if(!sp&&FORM.auto){FORM.asignados=[];FORM.auto=false}drawFormChips()});
+ f.elements.estado.onchange=()=>FORM.touched=true;
+ ["OC","APR","SEDE","FECHA"].forEach(k=>f.elements[k].addEventListener("input",()=>{if(FORM.touched)return;const v=n=>f.elements[n].value.trim();f.elements.estado.value=autoEstado({OC:v("OC"),APR:v("APR"),SEDE:v("SEDE"),FECHA:v("FECHA")})}));
+ f.onsubmit=e=>{e.preventDefault();saveForm(f)};
+ dlg.showModal()}
+function drawFormChips(){const h=$("#fhint");if(h)h.textContent=FORM.auto&&FORM.asignados.length?`Sugerido automáticamente: proveedor de la última compra de este material. Puedes cambiarlo.`:"";const el=$("#fch");if(el)el.innerHTML=FORM.asignados.map(s=>`<span class="chip">${esc(s)}<button type="button" data-act="formUn" data-s="${esc(s)}" aria-label="Quitar">${ic("x","s")}</button></span>`).join("")||`<span class="sub">Ninguno todavía</span>`}
+function saveForm(f){
+ const g=n=>f.elements[n].value.trim();const o={};["VS","OP","CANT","DESC","OBS","PROV","COT","OC","APR","ENTREGA","SEDE","FECHA","NOTAS","estado","DEST"].forEach(k=>o[k]=g(k));
+ if(!o.DESC){toast("Falta el material");return}
+ if(/^\d+$/.test(o.VS))o.VS=Number(o.VS);o.PROV=o.PROV.toUpperCase();
+ if(o.PROV&&!supByName(o.PROV))DB.suppliers.push({name:o.PROV,email:"",phone:"",entrega:""});
+ if(!DB.materials.some(m=>norm(m.name)===norm(o.DESC)))DB.materials.push({name:o.DESC,unit:""});
+ o.asignados=FORM.asignados;
+ if(FORM.id){const r=byId(FORM.id);Object.assign(r,o)}else{o.id="n"+Date.now().toString(36)+Math.random().toString(36).slice(2,5);o.seq=Math.max(0,...DB.records.map(r=>r.seq))+1;o.enviados={};DB.records.push(o)}
+ save();$("#dlg").close();toast("Solicitud guardada");render()}
+
+/* ---------- Proveedores / Materiales ---------- */
+function usage(name){return DB.records.filter(r=>r.PROV===name||(r.asignados||[]).includes(name)).length}
+function viewProv(){
+ $("#pageActions").innerHTML=`<button class="btn green" data-act="newSup">${ic("plus")}Nuevo proveedor</button>`;
+ $("#content").innerHTML=`<div class="bar"><label class="search" style="border:0;margin:0;width:100%">${ic("search")}<input data-bind="sq" placeholder="Buscar proveedor…" value="${esc(U.sq)}"></label></div><div id="sArea"></div>`;fillProv()}
+function fillProv(){const q=norm(U.sq),arr=DB.suppliers.filter(s=>!q||norm(s.name).includes(q)||norm(s.email).includes(q)).sort((a,b)=>a.name.localeCompare(b.name,"es"));
+ const size=15,pages=Math.max(1,Math.ceil(arr.length/size));if(U.spage>pages)U.spage=pages;const rows=arr.slice((U.spage-1)*size,U.spage*size);
+ $("#sArea").innerHTML=`<div class="card"><div class="tw"><table style="min-width:700px"><thead><tr><th>Proveedor</th><th>Correo(s) de cotización</th><th>Entrega</th><th>Teléfono</th><th>Materiales</th><th style="text-align:right">Acción</th></tr></thead><tbody>
+ ${rows.map(s=>`<tr><td class="strong">${esc(s.name)}</td><td>${s.email?esc(s.email):`<span class="tag amber">Sin correo</span>`}</td><td>${s.entrega==="DESPACHO"?`<span class="tag ok">Despacha</span>`:s.entrega==="RETIRO"?`<span class="tag">Retiramos</span>`:`<span class="tag amber">Sin definir</span>`}</td><td>${esc(s.phone)}</td><td>${usage(s.name)}</td><td><div class="acts"><button class="ib" data-act="editSup" data-s="${esc(s.name)}" title="Editar">${ic("pencil","s")}</button><button class="ib no" data-act="delSup" data-s="${esc(s.name)}" title="Eliminar">${ic("trash","s")}</button></div></td></tr>`).join("")}</tbody></table></div></div>${pager(arr.length,U.spage,size,"spage",false)}`}
+function supDialog(name){const s=name?supByName(name):{name:"",email:"",phone:"",entrega:""};const d=$("#dlgPick");
+ d.innerHTML=`<form method="dialog" id="sf"><div class="dh"><div><h2>${name?"Editar proveedor":"Nuevo proveedor"}</h2><p>Define si el proveedor despacha o si retiramos; el correo se completa según eso</p></div><button type="button" class="ib" data-act="closePick">${ic("x","s")}</button></div><div class="db" style="display:grid;gap:12px">
+ ${fld("","Nombre",`<input class="in" name="n" required value="${esc(s.name)}">`)}${fld("","Correo(s)",`<input class="in" name="e" value="${esc(s.email)}">`)}${fld("","Entrega",`<select class="in" name="en"><option value="">Sin definir</option><option value="DESPACHO" ${s.entrega==="DESPACHO"?"selected":""}>Despacha (nos lo envía)</option><option value="RETIRO" ${s.entrega==="RETIRO"?"selected":""}>Retiramos nosotros</option></select>`)}${fld("","Teléfono",`<input class="in" name="p" value="${esc(s.phone)}">`)}</div>
+ <div class="df"><button type="button" class="btn" data-act="closePick">Cancelar</button><button class="btn green" type="submit">Guardar</button></div></form>`;
+ d.querySelector("#sf").onsubmit=e=>{e.preventDefault();const f=e.target.elements,n=f.n.value.trim().toUpperCase();if(!n)return;
+  if(name){const old=s.name;if(n!==old&&supByName(n)){toast("Ese proveedor ya existe");return}s.name=n;s.email=f.e.value.trim();s.phone=f.p.value.trim();s.entrega=f.en.value;
+   if(n!==old)DB.records.forEach(r=>{if(r.PROV===old)r.PROV=n;r.asignados=(r.asignados||[]).map(x=>x===old?n:x);if(r.enviados&&old in r.enviados){r.enviados[n]=r.enviados[old];delete r.enviados[old]}})}
+  else{if(supByName(n)){toast("Ese proveedor ya existe");return}DB.suppliers.push({name:n,email:f.e.value.trim(),phone:f.p.value.trim(),entrega:f.en.value})}
+  save();d.close();render()};d.showModal()}
+function viewMat(){
+ $("#pageActions").innerHTML=`<button class="btn sm" data-act="impMat">${ic("ul","s")}Importar lista</button><button class="btn sm" data-act="expMat">${ic("dl","s")}Exportar lista</button><button class="btn sm" data-act="dedupMat">Limpiar duplicados</button><button class="btn green" data-act="newMat">${ic("plus")}Nuevo material</button>`;
+ $("#content").innerHTML=`<div class="bar"><label class="search" style="border:0;margin:0;width:100%">${ic("search")}<input data-bind="mq" placeholder="Buscar material…" value="${esc(U.mq)}"></label></div><div id="mArea"></div>`;fillMat()}
+function fillMat(){const q=norm(U.mq),arr=DB.materials.filter(m=>!q||norm(m.name).includes(q)).sort((a,b)=>a.name.localeCompare(b.name,"es"));
+ const size=15,pages=Math.max(1,Math.ceil(arr.length/size));if(U.mpage>pages)U.mpage=pages;const rows=arr.slice((U.mpage-1)*size,U.mpage*size);
+ $("#mArea").innerHTML=`<div class="card"><div class="tw"><table style="min-width:600px"><thead><tr><th>Material</th><th>Unidad</th><th>Veces pedido</th><th style="text-align:right">Acción</th></tr></thead><tbody>
+ ${rows.map(m=>`<tr><td class="strong">${esc(m.name)}</td><td>${esc(m.unit)}</td><td>${DB.records.filter(r=>norm(r.DESC)===norm(m.name)).length}</td><td><div class="acts"><button class="ib" data-act="editMat" data-n="${encodeURIComponent(m.name)}" title="Editar">${ic("pencil","s")}</button><button class="ib no" data-act="delMat" data-n="${encodeURIComponent(m.name)}" title="Eliminar">${ic("trash","s")}</button></div></td></tr>`).join("")}</tbody></table></div></div>${pager(arr.length,U.mpage,size,"mpage",false)}`}
+
+/* ---------- editar / importar materiales ---------- */
+const mkey=n=>strip(n).replace(/\s+/g," ");
+function splitCSV(l,sep){const r=[];let c="",q=false;for(let i=0;i<l.length;i++){const ch=l[i];if(q){if(ch==='"'){if(l[i+1]==='"'){c+='"';i++}else q=false}else c+=ch}else if(ch==='"'&&c===""){q=true}else if(ch===sep){r.push(c);c=""}else c+=ch}r.push(c);return r}
+function parseMatList(text,upper){const out=[];text.replace(/^\uFEFF/,"").split(/\r?\n/).forEach(ln=>{if(!ln.trim())return;const sep=ln.includes("\t")?"\t":ln.includes(";")?";":null;const cells=sep?splitCSV(ln,sep):[ln];let name=(cells[0]||"").replace(/^\s*[•·▪\-]\s+/,"").trim().replace(/\s+/g," "),unit=(cells[1]||"").trim();if(!name)return;if(upper)name=name.toUpperCase();out.push({name,unit})});
+ if(out.length&&/^(material(es)?|descripci[oó]n|descripcion|nombre|detalle)$/i.test(out[0].name))out.shift();return out}
+function matDialog(old){const m=old?DB.materials.find(x=>x.name===old):{name:"",unit:""};if(!m)return;const n0=old?DB.records.filter(r=>norm(r.DESC)===norm(old)).length:0;const d=$("#dlgPick");
+ d.innerHTML=`<form method="dialog" id="mf"><div class="dh"><div><h2>${old?"Editar material":"Nuevo material"}</h2><p>Catálogo que aparece al escribir la descripción de una solicitud</p></div><button type="button" class="ib" data-act="closePick">${ic("x","s")}</button></div><div class="db" style="display:grid;gap:12px">${fld("","Descripción",`<input class="in" name="n" required value="${esc(m.name)}">`)}${fld("","Unidad (opcional)",`<input class="in" name="u" value="${esc(m.unit)}" placeholder="UN, MT, KG…">`)}${n0?`<label style="display:flex;gap:8px;align-items:center;font-size:13px"><input type="checkbox" name="p" checked>Si cambio el nombre, actualizar también las ${n0} solicitud(es) que lo usan</label>`:""}</div><div class="df"><button type="button" class="btn" data-act="closePick">Cancelar</button><button class="btn green" type="submit">Guardar</button></div></form>`;
+ d.querySelector("#mf").onsubmit=e=>{e.preventDefault();const f=e.target.elements,n=f.n.value.trim().replace(/\s+/g," ");if(!n)return;
+  if((!old||mkey(n)!==mkey(old))&&DB.materials.some(x=>mkey(x.name)===mkey(n))){toast("Ya existe un material con ese nombre");return}
+  if(old){if(f.p&&f.p.checked&&n!==old)DB.records.forEach(r=>{if(norm(r.DESC)===norm(old))r.DESC=n});m.name=n;m.unit=f.u.value.trim()}
+  else DB.materials.push({name:n,unit:f.u.value.trim()});
+  save();d.close();render();toast(old?"Material actualizado":"Material agregado")};d.showModal()}
+function impDialog(){const d=$("#dlgPick");
+ d.innerHTML=`<div class="dh"><div><h2>Importar lista de materiales</h2><p>Pega la lista o sube un archivo .csv / .txt. Una línea por material; opcionalmente <b>material;unidad</b> (o separado por tabulador, como al copiar desde Excel).</p></div><button type="button" class="ib" data-act="closePick">${ic("x","s")}</button></div>
+ <div class="db" style="display:grid;gap:12px"><textarea class="in" id="impTxt" rows="9" placeholder="CABLE EVA 6MM NEGRO&#10;ARGON;BOTELLA&#10;BROCA CILINDRICA Ø8MM -HSS" style="font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px"></textarea>
+ <div class="row" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><label class="btn sm" style="cursor:pointer">${ic("ul","s")}Elegir archivo<input type="file" id="impFile" accept=".csv,.txt,.tsv,text/plain,text/csv" hidden></label><span style="color:var(--muted);font-size:12px">Desde Excel: copia la columna y pégala arriba.</span></div>
+ <div style="display:grid;gap:8px;font-size:13px"><label style="display:flex;gap:8px;align-items:center"><input type="radio" name="im" value="merge" checked>Agregar a la lista actual (omite los que ya existen)</label><label style="display:flex;gap:8px;align-items:center"><input type="radio" name="im" value="replace">Reemplazar toda la lista actual por esta</label><label style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="impUp" checked>Pasar a MAYÚSCULAS (como el resto del catálogo)</label></div>
+ <div id="impSum" style="font-size:13px;color:var(--muted)">Aún no hay nada que importar.</div></div>
+ <div class="df"><button type="button" class="btn" data-act="closePick">Cancelar</button><button class="btn green" type="button" id="impGo" disabled>Importar</button></div>`;
+ const T=d.querySelector("#impTxt"),U2=d.querySelector("#impUp"),G=d.querySelector("#impGo"),S=d.querySelector("#impSum"),mode=()=>d.querySelector('input[name=im]:checked').value;
+ const calc=()=>{const rows=parseMatList(T.value,U2.checked),seen=new Set(),uniq=[];let rep=0;rows.forEach(r=>{const k=mkey(r.name);if(seen.has(k)){rep++;const u=uniq.find(x=>mkey(x.name)===k);if(u&&!u.unit&&r.unit)u.unit=r.unit}else{seen.add(k);uniq.push(r)}});const have=new Set(DB.materials.map(m=>mkey(m.name)));const nuevos=uniq.filter(r=>!have.has(mkey(r.name))),ya=uniq.length-nuevos.length;return{rows,uniq,nuevos,ya,rep}};
+ const draw=()=>{const c=calc();G.disabled=!c.uniq.length;if(!c.rows.length){S.innerHTML="Aún no hay nada que importar.";return}
+  S.innerHTML=mode()==="merge"?`<b style="color:var(--ink)">${c.rows.length}</b> línea(s) leída(s) · <b style="color:var(--ink)">${c.nuevos.length}</b> material(es) nuevo(s) · ${c.ya} ya existían · ${c.rep} repetido(s) en tu lista`:`La lista quedará con <b style="color:var(--ink)">${c.uniq.length}</b> materiales y reemplazará los <b style="color:var(--ink)">${DB.materials.length}</b> actuales (${c.rep} repetido(s) en tu lista se unifican). Las solicitudes ya creadas no se modifican.`};
+ T.oninput=draw;U2.onchange=draw;d.querySelectorAll("input[name=im]").forEach(i=>i.onchange=draw);
+ d.querySelector("#impFile").onchange=async e=>{const f=e.target.files[0];if(!f)return;let t=await f.text();if(t.includes("\uFFFD")){try{t=new TextDecoder("windows-1252").decode(await f.arrayBuffer())}catch(x){}}T.value=t;draw();e.target.value=""};
+ G.onclick=()=>{const c=calc();if(!c.uniq.length)return;
+  if(mode()==="replace"){if(!confirm(`Se reemplazan los ${DB.materials.length} materiales actuales por ${c.uniq.length}. ¿Continuar?`))return;DB.materials=c.uniq.map(r=>({name:r.name,unit:r.unit}));toast(`Lista reemplazada: ${c.uniq.length} materiales`)}
+  else{const idx=new Map(DB.materials.map(m=>[mkey(m.name),m]));let add=0;c.uniq.forEach(r=>{const ex=idx.get(mkey(r.name));if(ex){if(!ex.unit&&r.unit)ex.unit=r.unit}else{const m={name:r.name,unit:r.unit};DB.materials.push(m);idx.set(mkey(r.name),m);add++}});toast(`Importados ${add} materiales nuevos`)}
+  save();d.close();U.mpage=1;render()};
+ d.showModal()}
+
+/* ---------- nube (Supabase) ---------- */
+const CLOUD_DEFAULT={url:"",key:""};
+const CKEY="compras_cloud_v1";
+const CL=Object.assign({url:"",key:"",email:"",access:"",refresh:"",exp:0,rev:0,auto:true,dirty:false,last:""},(()=>{try{return JSON.parse(localStorage.getItem(CKEY))||{}}catch(e){return{}}})());
+if(!CL.url)CL.url=CLOUD_DEFAULT.url;if(!CL.key)CL.key=CLOUD_DEFAULT.key;
+const cSave=()=>{try{localStorage.setItem(CKEY,JSON.stringify(CL))}catch(e){}};
+const cOn=()=>!!(CL.url&&CL.key&&CL.refresh);
+const cBase=()=>CL.url.replace(/\/+$/,"");
+let cT=null,cBusy=false;
+const CST={off:"Nube: sin conectar",ok:"Nube: al día",pending:"Nube: guardando…",err:"Nube: sin conexión",conflict:"Nube: elige versión"};
+function cStat(k){const e=document.querySelector("#cloudSt span");if(e)e.textContent=CST[k]||""}
+async function cAuth(body,grant){const r=await fetch(`${cBase()}/auth/v1/token?grant_type=${grant}`,{method:"POST",headers:{apikey:CL.key,"Content-Type":"application/json"},body:JSON.stringify(body)});const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.error_description||j.msg||j.message||("Error "+r.status));CL.access=j.access_token;CL.refresh=j.refresh_token;CL.exp=Date.now()+Math.max(30,(j.expires_in||3600)-60)*1000;if(j.user&&j.user.email)CL.email=j.user.email;cSave()}
+async function cToken(){if(!CL.refresh)throw new Error("Sin sesión");if(!CL.access||Date.now()>CL.exp)await cAuth({refresh_token:CL.refresh},"refresh_token");return CL.access}
+async function cReq(path,opt={}){const t=await cToken();const r=await fetch(`${cBase()}/rest/v1/${path}`,{...opt,headers:{apikey:CL.key,Authorization:"Bearer "+t,"Content-Type":"application/json",...(opt.headers||{})}});const txt=await r.text();let j=null;try{j=txt?JSON.parse(txt):null}catch(e){}if(!r.ok)throw new Error((j&&(j.message||j.hint))||("Error "+r.status));return j}
+async function cGet(){const a=await cReq("app_state?id=eq.main&select=data,rev,updated_at");return a&&a[0]||null}
+async function cPush(force){const rem=await cReq("app_state?id=eq.main&select=rev");const h=rem&&rem[0];
+ if(!h){const a=await cReq("app_state",{method:"POST",headers:{Prefer:"return=representation"},body:JSON.stringify({id:"main",data:DB,rev:1})});CL.rev=a[0].rev}
+ else{if(!force&&h.rev!==CL.rev)return"conflict";const a=await cReq(`app_state?id=eq.main&rev=eq.${h.rev}`,{method:"PATCH",headers:{Prefer:"return=representation"},body:JSON.stringify({data:DB,rev:h.rev+1})});if(!a||!a.length)return"conflict";CL.rev=a[0].rev}
+ CL.dirty=false;CL.last=new Date().toISOString();cSave();return"ok"}
+async function cPull(){const rem=await cGet();if(!rem)return false;if(!rem.data||!Array.isArray(rem.data.records)||!Array.isArray(rem.data.suppliers)||!Array.isArray(rem.data.materials))throw new Error("Los datos de la nube no tienen el formato esperado");DB=rem.data;ensureSettings();try{localStorage.setItem(KEY,JSON.stringify(DB))}catch(e){}CL.rev=rem.rev;CL.dirty=false;CL.last=new Date().toISOString();cSave();updateDot();render();return true}
+function cMark(){if(cOn()){CL.dirty=true;cSave();cSched()}}
+function cSched(){if(!CL.auto||!cOn())return;clearTimeout(cT);cStat("pending");cT=setTimeout(cAuto,4000)}
+async function cAuto(){if(!cOn())return;if(cBusy){cT=setTimeout(cAuto,2000);return}cBusy=true;try{const r=await cPush(false);if(r==="ok")cStat("ok");else cConflict()}catch(e){cStat("err")}cBusy=false}
+async function cCheck(){if(!cOn()||cBusy)return;try{const a=await cReq("app_state?id=eq.main&select=rev");const h=a&&a[0];if(!h){if(CL.dirty)cSched();return}
+ if(h.rev>CL.rev){if(!CL.dirty){await cPull();toast("Datos actualizados desde la nube");cStat("ok")}else cConflict()}
+ else{cStat(CL.dirty?"pending":"ok");if(CL.dirty)cSched()}}catch(e){cStat("err")}}
+function cDialog(rem){const d=$("#dlgPick"),nr=rem&&rem.data&&rem.data.records?rem.data.records.length:0;
+ d.innerHTML=`<div class="dh"><div><h2>Hay datos distintos en la nube</h2><p>Elige cuáles conservar. Antes puedes descargar un respaldo de este equipo.</p></div><button type="button" class="ib" data-act="closePick">${ic("x","s")}</button></div><div class="db" style="display:grid;gap:8px;font-size:14px"><div><b>Nube:</b> ${nr} registros${rem&&rem.updated_at?` · actualizado ${esc(new Date(rem.updated_at).toLocaleString("es-CL"))}`:""}</div><div><b>Este equipo:</b> ${DB.records.length} registros</div></div><div class="df" style="flex-wrap:wrap"><button type="button" class="btn" data-act="expJSON">Respaldo de este equipo</button><button type="button" class="btn" data-act="cloudForce">Subir los de este equipo</button><button type="button" class="btn green" data-act="cloudUse">Usar los de la nube</button></div>`;d.showModal();cStat("conflict")}
+async function cConflict(){try{cDialog(await cGet())}catch(e){cStat("err")}}
+async function cAfterLogin(){const rem=await cGet(),nloc=DB.records.length;
+ if(!rem){if(nloc&&confirm(`La nube está vacía. ¿Subir los ${nloc} registros de este equipo?`)){await cPush(true);toast("Datos subidos a la nube")}return}
+ if(!nloc){await cPull();toast("Datos descargados de la nube");return}
+ cDialog(rem)}
+function cloudPanel(){const hd=`<div class="panel" style="grid-column:1/-1"><h3>Respaldo en la nube (Supabase)</h3>`;
+ if(cOn())return hd+`<p>Tus datos se guardan en tu Supabase y se sincronizan solos unos segundos después de cada cambio. Abre la app en otro equipo, inicia sesión y verás lo mismo.</p><div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><span class="tag ok">Conectado: ${esc(CL.email)}</span><span style="color:var(--muted);font-size:12px">${CL.last?"Última sincronización: "+esc(new Date(CL.last).toLocaleString("es-CL")):"Aún sin sincronizar"}${CL.dirty?" · hay cambios sin subir":""}</span></div><div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:14px"><button class="btn sm dark" data-act="cloudPush">Sincronizar ahora</button><button class="btn sm" data-act="cloudPull">Descargar de la nube</button><button class="btn sm" data-act="cloudOut">Cerrar sesión</button><label style="display:flex;gap:8px;align-items:center;font-size:13px"><input type="checkbox" data-act="cloudAuto" ${CL.auto?"checked":""}>Sincronizar automáticamente</label></div></div>`;
+ return hd+`<p>Guarda todo en tu proyecto de Supabase para verlo desde cualquier equipo. Necesitas la URL del proyecto, la clave «anon / publishable» y un usuario creado en Authentication.</p><div style="display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr))"><input class="in" id="cUrl" placeholder="https://xxxx.supabase.co" value="${esc(CL.url)}"><input class="in" id="cKey" placeholder="Clave anon / publishable" value="${esc(CL.key)}"><input class="in" id="cEmail" placeholder="Correo" value="${esc(CL.email)}" autocomplete="username"><input class="in" id="cPass" type="password" placeholder="Contraseña" autocomplete="current-password"></div><div style="margin-top:14px"><button class="btn sm dark" data-act="cloudLogin">Conectar</button></div></div>`}
+
+/* ---------- Datos ---------- */
+function viewDatos(){
+ $("#pageActions").innerHTML="";
+ $("#content").innerHTML=`<div class="kv">
+ <div class="panel"><h3>Respaldo</h3><p>Todo se guarda en este navegador. Descarga un respaldo con frecuencia; sirve para llevar los datos a otro equipo. «Copiar para Google Sheets» copia todos los registros con el color de cada fila (sin columna de color); pégalos en la celda A1 de tu hoja.</p><div class="row"><button class="btn sm dark" data-act="expJSON">${ic("dl","s")}Descargar respaldo</button><label class="btn sm" style="cursor:pointer">${ic("ul","s")}Importar respaldo<input type="file" accept=".json" id="impJSON" hidden></label><button class="btn sm dark" data-act="copySheets">${ic("ul","s")}Copiar para Google Sheets</button><button class="btn sm" data-act="exportCSV">${ic("dl","s")}Exportar CSV</button></div></div>
+ ${cloudPanel()}<div class="panel"><h3>Firma del correo</h3><p>Se agrega al final de cada correo de cotización.</p><textarea class="in" id="firma" rows="4" placeholder="Nombre&#10;Cargo · Empresa&#10;Teléfono">${esc(DB.settings.firma)}</textarea></div>
+ <div class="panel" style="grid-column:1/-1"><h3>Sedes de despacho <button class="btn xs" data-act="sedes" style="margin-left:8px">Editar en ventana</button></h3><p>Dirección que se incluye en el correo cuando el proveedor despacha. Si el nombre de la sede coincide con la OP, se asigna sola.</p><div style="display:grid;gap:10px">${DB.settings.sedes.map((x,i)=>`<div class="row"><input class="in" data-sede="${i}" data-f="name" value="${esc(x.name)}" placeholder="Nombre" style="flex:0 1 200px"><input class="in" data-sede="${i}" data-f="dir" value="${esc(x.dir)}" placeholder="Dirección completa (calle, número, comuna)" style="flex:1;min-width:220px"></div>`).join("")}</div></div>
+ <div class="panel"><h3>Colores</h3><p>Se importaron tal cual desde tu Excel.</p>${legend()}</div>
+ ${SEED.records.length?`<div class="panel"><h3>Datos originales</h3><p>Vuelve a cargar los ${SEED.records.length} registros del Excel. Se pierden los cambios hechos aquí.</p><button class="btn sm danger" data-act="reset">Restaurar datos del Excel</button></div>`:""}</div>`;
+ document.querySelectorAll("[data-sede]").forEach(i=>i.oninput=()=>{DB.settings.sedes[i.dataset.sede][i.dataset.f]=i.value;save()});
+ $("#firma").oninput=e=>{DB.settings.firma=e.target.value;save()};
+ $("#impJSON").onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const d=JSON.parse(await f.text());if(!Array.isArray(d.records)||!Array.isArray(d.suppliers)||!Array.isArray(d.materials))throw 0;if(!d.records.every(r=>r.id&&r.estado))throw 0;if(confirm("Importar reemplaza los datos actuales. ¿Continuar?")){DB=d;ensureSettings();save();toast("Respaldo importado");render()}}catch(x){toast("Ese archivo no es un respaldo válido de esta versión")}e.target.value=""}}
+function legend(){return `<div class="legend"><div><span class="sw" style="background:var(--c-green)"></span>Verde: comprado / recepcionado</div><div><span class="sw" style="background:var(--c-yellow)"></span>Amarillo: OC emitida sin recepción</div><div><span class="sw" style="background:var(--c-red)"></span>Rojo: se anula o rechaza la compra</div><div><span class="sw" style="background:#fff"></span>Blanco: no cotizado o en espera de cotización</div></div>`}
+function exportCSV(){const q=(s)=>'"'+String(s??"").replace(/"/g,'""')+'"';const ESTN={white:"BLANCO",yellow:"AMARILLO",green:"VERDE",red:"ROJO"};
+ const arr=U.view==="compras"?sortRecs(filtered()):DB.records.slice().sort((a,b)=>a.seq-b.seq);
+ const csv=[["COLOR",...COLS.map(c=>c[1]),"PROVEEDORES A COTIZAR","ENVIADOS"].join(";"),...arr.map(r=>[ESTN[r.estado],...COLS.map(([k])=>k==="FECHA"?fmtD(r[k]):r[k]),(r.asignados||[]).join(" / "),Object.entries(r.enviados||{}).map(([s,d])=>s+" "+fmtD(d)).join(" / ")].map(q).join(";"))].join("\r\n");
+ download("﻿"+csv,"compras_materiales.csv","text/csv;charset=utf-8");toast(`Exportados ${arr.length} registros`)}
+
+/* ---------- copiar para Google Sheets ---------- */
+function sheetData(arr){const BG={white:"#ffffff",yellow:"#FFE599",green:"#B6D7A8",red:"#EA9999"},ESTN={white:"BLANCO",yellow:"AMARILLO",green:"VERDE",red:"ROJO"};
+ const head=[...COLS.map(c=>c[1]),"PROVEEDORES A COTIZAR","ENVIADOS"];
+ const rows=arr.map(r=>({bg:BG[r.estado]||"#ffffff",cells:[...COLS.map(([k])=>k==="FECHA"?fmtD(r[k]):r[k]),(r.asignados||[]).join(" / "),Object.entries(r.enviados||{}).map(([s,d])=>s+" "+fmtD(d)).join(" / ")].map(v=>String(v??"").replace(/\s*[\r\n\t]+\s*/g," ").trim())}));
+ const tsv=[head,...rows.map(r=>r.cells)].map(a=>a.join("\t")).join("\n");
+ const html=`<table><thead><tr>${head.map(h=>`<th style="background-color:#314147;color:#ffffff;font-weight:bold">${esc(h)}</th>`).join("")}</tr></thead><tbody>${rows.map(r=>`<tr>${r.cells.map(c=>`<td style="background-color:${r.bg}">${esc(c)}</td>`).join("")}</tr>`).join("")}</tbody></table>`;
+ return{tsv,html,n:arr.length}}
+async function copySheets(){const arr=U.view==="compras"?sortRecs(filtered()):DB.records.slice().sort((a,b)=>a.seq-b.seq);const {tsv,html,n}=sheetData(arr);let ok=false;
+ try{await navigator.clipboard.write([new ClipboardItem({"text/html":new Blob([html],{type:"text/html"}),"text/plain":new Blob([tsv],{type:"text/plain"})})]);ok=true}catch(e){}
+ if(!ok){const d=document.createElement("div");d.contentEditable="true";d.style.cssText="position:fixed;left:-9999px;top:0";d.innerHTML=html;document.body.appendChild(d);const rg=document.createRange();rg.selectNodeContents(d);const sl=getSelection();sl.removeAllRanges();sl.addRange(rg);try{ok=document.execCommand("copy")}catch(x){}sl.removeAllRanges();d.remove()}
+ if(!ok){download("\uFEFF"+tsv,"compras_materiales.tsv","text/tab-separated-values;charset=utf-8");toast("No se pudo copiar. Se descargó un archivo: en Sheets usa Archivo > Importar");return}
+ toast(`${n} registros copiados. En tu Google Sheet: clic en A1 y Ctrl+V`)}
+
+/* ---------- eventos ---------- */
+const ACT={
+ go:d=>go(d.v),
+ help:()=>{const dlg=$("#dlg");dlg.className="sm";dlg.innerHTML=`<div class="dh"><div><h2>Cómo funciona</h2></div><button class="ib" data-act="closeDlg">${ic("x","s")}</button></div><div class="db"><div class="sec">Colores</div>${legend()}<div class="sec" style="margin-top:20px">Flujo de cotización</div><ol style="margin:0;padding-left:20px;line-height:1.8"><li>Crea la solicitud (<b>Nueva solicitud</b>).</li><li>En <b>Cotizar</b>, asigna uno o varios proveedores a cada material.</li><li><b>Preparar correos</b>: se genera un correo individual por proveedor con todos sus materiales.</li><li>Ábrelo en Outlook, envíalo y marca <b>enviado</b>.</li><li>Cuando respondan, abre el material y completa proveedor elegido, OC y recepción.</li></ol></div><div class="df"><button class="btn dark" data-act="closeDlg">Entendido</button></div>`;dlg.showModal()},
+ closeDlg:()=>$("#dlg").close(),closePick:()=>$("#dlgPick").close(),
+ pg:d=>{const k=d.k;U[k]=Number(d.p);({page:fillCompras,cpage:fillCotizar,spage:fillProv,mpage:fillMat})[k]()},
+ sort:d=>{U.sort=U.sort.k===d.k?{k:d.k,d:-U.sort.d}:{k:d.k,d:d.k==="estado"||d.k==="DESC"||d.k==="PROV"?1:-1};fillCompras()},
+ estado:d=>{U.estado=d.k;U.page=1;viewCompras()},
+ hideRed:()=>{U.hideRed=!U.hideRed;U.page=1;viewCompras()},
+ togglePop:()=>$("#pop").classList.toggle("hidden"),
+ clearF:()=>{U.f={prov:"",op:"",entrega:"",sede:""};U.page=1;viewCompras()},
+ sendOC:d=>openOC(d.id),
+ ocRm:d=>{OCM.files.splice(Number(d.i),1);updOC()},
+ ocCopy:async()=>{try{await navigator.clipboard.writeText(`Asunto: ${subjectOC()}\n\n${emailTextOC()}`);toast("Texto copiado")}catch(e){toast("No se pudo copiar")}},
+ ocMailto:()=>{const to=($("#ocTo").value||ocTo()).split(/[;,]\s*/).filter(Boolean).join(",");const a=document.createElement("a");a.href=`mailto:${to}?subject=${encodeURIComponent(subjectOC())}&body=${encodeURIComponent(emailTextOC().replace(/\n/g,"\r\n"))}`;document.body.appendChild(a);a.click();a.remove();toast("Adjunta el PDF a mano o usa el borrador con adjunto")},
+ ocEml:async()=>{if(!OCM.files.length&&!confirm("No elegiste ningún archivo. ¿Descargar el borrador sin adjunto?"))return;download(await emlOC(),"OC_"+String(OCM.items[0].OC).replace(/\W+/g,"_")+".eml","message/rfc822");toast("Borrador descargado: ábrelo con Outlook")},
+ ocSent:()=>{OCM.items.forEach(r=>r.ocEnviada=today());save();$("#dlg").close();toast("OC marcada como enviada");render()},
+ newRec:()=>openForm(null),edit:d=>openForm(d.id),
+ del:d=>{const r=byId(d.id);if(r&&confirm(`¿Eliminar "${r.DESC}"? No se puede deshacer.`)){DB.records=DB.records.filter(x=>x.id!==d.id);U.sel.delete(d.id);save();render()}},
+ cfilter:d=>{U.cfilter=d.k;U.cpage=1;viewCotizar()},
+ sel:(d,t)=>{t.checked?U.sel.add(d.id):U.sel.delete(d.id);fillCotizar()},
+ selAll:(d,t)=>{const rows=cotizarList().slice((U.cpage-1)*15,U.cpage*15);rows.forEach(r=>t.checked?U.sel.add(r.id):U.sel.delete(r.id));fillCotizar()},
+ bulkAssign:()=>pickFor([...U.sel]),
+ pick1:d=>pickFor([d.id]),
+ assignOne:d=>{const r=byId(d.id);r.asignados=[...(r.asignados||[]),d.s];save();fillCotizar();updateDot()},
+ unassign:d=>{const r=byId(d.id);r.asignados=(r.asignados||[]).filter(x=>x!==d.s);if(r.enviados)delete r.enviados[d.s];save();fillCotizar()},
+ prepare:()=>{const sel=[...U.sel].filter(id=>byId(id)&&byId(id).estado==="white");openPrepare(sel.length?sel:pendientes().map(r=>r.id))},
+ quote1:d=>{const r=byId(d.id);if(!(r.asignados||[]).length){pickSuppliers({title:"¿A quién cotizar?",sub:r.DESC,suggestions:suggest(r),onOk:l=>{if(!l.length)return;r.asignados=l;save();openPrepare([r.id],true)}});return}openPrepare([d.id],true)},
+ resend:(d,t)=>openPrepare(MAILS.ids,t.checked),
+ openMail:d=>{const url=mailURL(d.s);if(url.length>1900){download(emlFor(d.s),"cotizacion_"+d.s.replace(/\W+/g,"_")+".eml","message/rfc822");toast("Correo largo: se descargó un borrador .eml, ábrelo con Outlook")}else{const a=document.createElement("a");a.href=url;document.body.appendChild(a);a.click();a.remove()}},
+ copyMail:async d=>{const t=`Asunto: ${subjectFor(MAILS.g.get(d.s))}\n\n${emailText(MAILS.g.get(d.s),d.s)}`;try{await navigator.clipboard.writeText(t);toast("Texto copiado")}catch(e){toast("No se pudo copiar")}},
+ emlMail:d=>download(emlFor(d.s),"cotizacion_"+d.s.replace(/\W+/g,"_")+".eml","message/rfc822"),
+ sentMail:d=>{markSent(d.s);refreshMail(d.s);toast(`Marcado como enviado: ${d.s}`)},
+ markAll:()=>{[...MAILS.g.keys()].forEach(s=>markSent(s));openPrepare(MAILS.ids,MAILS.resend);if(U.view==="cotizar")fillCotizar()},
+ formPick:()=>pickSuppliers({title:"Proveedores a cotizar",sub:"Cada uno recibe su propio correo",selected:FORM.asignados,onOk:l=>{FORM.asignados=l;FORM.auto=false;drawFormChips()}}),
+ formUn:d=>{FORM.asignados=FORM.asignados.filter(x=>x!==d.s);FORM.auto=false;drawFormChips()},
+ sedes:sedesDialog,newSup:()=>supDialog(null),editSup:d=>supDialog(d.s),
+ delSup:d=>{if(confirm(`¿Eliminar a ${d.s} de la base? Los registros no se borran.`)){DB.suppliers=DB.suppliers.filter(s=>s.name!==d.s);save();fillProv()}},
+ newMat:()=>matDialog(null),
+ delMat:d=>{const n=decodeURIComponent(d.n);if(confirm("¿Eliminar este material del catálogo?")){DB.materials=DB.materials.filter(m=>m.name!==n);save();fillMat()}},
+ editMat:d=>matDialog(decodeURIComponent(d.n)),
+ impMat:()=>impDialog(),
+ expMat:()=>{const q=x=>'"'+String(x??"").replace(/"/g,'""')+'"';const rows=DB.materials.slice().sort((a,b)=>a.name.localeCompare(b.name,"es"));download("\uFEFF"+["Material;Unidad",...rows.map(m=>q(m.name)+";"+q(m.unit))].join("\r\n"),"materiales_"+today()+".csv","text/csv;charset=utf-8");toast(`Exportados ${rows.length} materiales`)},
+ dedupMat:()=>{const g=new Map();DB.materials.forEach(m=>{const k=mkey(m.name);(g.get(k)||g.set(k,[]).get(k)).push(m)});const dups=[...g.values()].filter(a=>a.length>1);if(!dups.length){toast("No hay materiales repetidos (ignorando mayúsculas y espacios)");return}const extra=dups.reduce((n,a)=>n+a.length-1,0);if(!confirm(`Hay ${dups.length} material(es) repetido(s) (${extra} entradas sobrantes). Se deja una sola de cada uno, preferentemente la escrita en MAYÚSCULAS. ¿Continuar?`))return;const drop=new Set();dups.forEach(a=>{const best=a.slice().sort((x,y)=>(y.name===y.name.toUpperCase())-(x.name===x.name.toUpperCase())||(!!y.unit)-(!!x.unit))[0];a.forEach(m=>{if(m!==best){if(!best.unit&&m.unit)best.unit=m.unit;drop.add(m)}})});DB.materials=DB.materials.filter(m=>!drop.has(m));save();fillMat();toast(`Se eliminaron ${drop.size} duplicados`)},
+ cloudLogin:async()=>{const url=$("#cUrl").value.trim(),key=$("#cKey").value.trim(),em=$("#cEmail").value.trim(),pw=$("#cPass").value;if(!url||!key||!em||!pw){toast("Completa URL, clave, correo y contraseña");return}CL.url=url;CL.key=key;try{await cAuth({email:em,password:pw},"password");CL.email=em;cSave();await cAfterLogin();cStat("ok");render()}catch(e){CL.refresh="";CL.access="";toast("No se pudo conectar: "+e.message)}},
+ cloudPush:async()=>{try{cStat("pending");const r=await cPush(false);if(r==="ok"){cStat("ok");toast("Sincronizado");render()}else cConflict()}catch(e){cStat("err");toast("Error: "+e.message)}},
+ cloudPull:async()=>{if(!confirm(CL.dirty?"Hay cambios de este equipo sin subir que se perderán. ¿Descargar de la nube igual?":"Se reemplazan los datos de este equipo por los de la nube. ¿Continuar?"))return;try{toast(await cPull()?"Datos descargados de la nube":"La nube aún no tiene datos");cStat("ok")}catch(e){toast("Error: "+e.message)}},
+ cloudUse:async()=>{$("#dlgPick").close();try{await cPull();cStat("ok");toast("Datos descargados de la nube")}catch(e){toast("Error: "+e.message)}},
+ cloudForce:async()=>{$("#dlgPick").close();try{await cPush(true);cStat("ok");toast("La nube ahora tiene los datos de este equipo");render()}catch(e){toast("Error: "+e.message)}},
+ cloudOut:()=>{CL.access="";CL.refresh="";CL.exp=0;cSave();cStat("off");render()},
+ cloudAuto:(d,t)=>{CL.auto=t.checked;cSave();if(CL.auto&&CL.dirty)cSched()},
+ copySheets, exportCSV,  expJSON:()=>download(JSON.stringify({version:2,exportedAt:new Date().toISOString(),...DB},null,1),"respaldo_compras_"+today()+".json","application/json"),
+ reset:()=>{if(confirm("Se reemplazan todos los datos por los del Excel original (y, si la nube está conectada, también lo que hay allá). ¿Continuar?")){DB=JSON.parse(JSON.stringify(SEED));ensureSettings();save();toast("Datos restaurados");render()}}
+};
+document.addEventListener("click",e=>{
+ const pop=$("#pop");if(pop&&!pop.classList.contains("hidden")&&!e.target.closest("#pop,[data-act=togglePop]"))pop.classList.add("hidden");
+ const t=e.target.closest("[data-act]");if(!t||t.tagName==="INPUT"&&t.type==="checkbox"&&e.type==="click"&&false)return;
+ if(t.tagName==="INPUT")return; ACT[t.dataset.act]?.(t.dataset,t,e)});
+document.addEventListener("change",e=>{const t=e.target;if(t.tagName==="INPUT"&&t.dataset.act)ACT[t.dataset.act]?.(t.dataset,t,e);
+ const b=t.dataset?.bind;if(!b)return;
+ if(b==="size"){U.size=Number(t.value);U.page=1;fillCompras()}
+ else if(b.startsWith("f.")){U.f[b.slice(2)]=t.value;U.page=1;const pop=$("#pop");const open=!pop.classList.contains("hidden");viewCompras();if(open)$("#pop").classList.remove("hidden")}
+ else if(b==="ment"){let sp=supByName(t.dataset.s);if(!sp){sp={name:t.dataset.s,email:"",phone:"",entrega:""};DB.suppliers.push(sp)}sp.entrega=t.value;save();refreshMail(t.dataset.s)}
+ else if(b==="mdest"){if(t.value!=="__mix"){MAILS.g.get(t.dataset.s).forEach(r=>r.DEST=t.value);save();refreshMail(t.dataset.s)}}
+ else if(b==="supmail"){const s=supByName(t.dataset.s);if(s){s.email=t.value.trim();save()}else{DB.suppliers.push({name:t.dataset.s,email:t.value.trim(),phone:""});save()}}});
+document.addEventListener("input",e=>{const b=e.target.dataset?.bind;if(!b)return;
+ if(b==="q"){U.q=e.target.value;U.page=1;fillCompras()}
+ if(b==="cq"){U.cq=e.target.value;U.cpage=1;fillCotizar()}
+ if(b==="sq"){U.sq=e.target.value;U.spage=1;fillProv()}
+ if(b==="mq"){U.mq=e.target.value;U.mpage=1;fillMat()}});
+render();cStat(cOn()?"ok":"off");cCheck();document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")cCheck()});
+</script></body></html>
