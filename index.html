@@ -367,6 +367,17 @@ function emailText(items,sn){const mode=(supByName(sn)||{}).entrega||"",one=item
  if(same)t+=`\n\nEl despacho debe realizarse a la siguiente dirección: ${sedeTxt(dests[0])}`;
  else if(mode==="RETIRO")t+=`\n\nEl retiro lo realizaremos nosotros en sus instalaciones.`;
  t+=`\n\nSaludos.`;if(DB.settings.firma)t+=`\n${DB.settings.firma}`;return t}
+function emailHTML(items,sn){const mode=(supByName(sn)||{}).entrega||"",one=items.length===1;
+ const dests=[...new Set(items.map(destOf))],same=mode==="DESPACHO"&&dests.length===1&&dests[0];
+ const showDir=mode==="DESPACHO"&&!same&&items.some(r=>destOf(r)),showObs=items.some(r=>r.OBS);
+ const P=t=>`<p style="margin:0 0 14px">${t}</p>`,D=(t,x="")=>`<td style="border:1px solid #d5dde1;padding:7px 11px;vertical-align:top;${x}">${t}</td>`,H=(t,x="")=>`<th style="border:1px solid #314147;background:#314147;color:#ffffff;padding:8px 11px;text-align:left;font-weight:600;${x}">${t}</th>`;
+ const rows=items.map((r,i)=>`<tr style="background:${i%2?"#f3f6f8":"#ffffff"}">${D(i+1,"text-align:center")}${D(esc(r.DESC))}${D(esc(r.CANT),"white-space:nowrap")}${showObs?D(esc(r.OBS||"")):""}${showDir?D(esc(sedeTxt(destOf(r)))):""}</tr>`).join("");
+ let h=P("Estimados,")+P(`Junto con saludar, solicito cotizar ${one?"el siguiente material":"los siguientes materiales"}:`);
+ h+=`<table style="border-collapse:collapse;margin:0 0 16px;font-size:14px"><thead><tr>${H("N°","text-align:center")}${H("Material")}${H("Cantidad")}${showObs?H("Observaciones"):""}${showDir?H("Dirección de despacho"):""}</tr></thead><tbody>${rows}</tbody></table>`;
+ h+=P("Agradeceré indicar precio, disponibilidad y plazo de entrega.");
+ if(same)h+=P(`El despacho debe realizarse a la siguiente dirección: <b>${esc(sedeTxt(dests[0]))}</b>`);else if(mode==="RETIRO")h+=P("El retiro lo realizaremos nosotros en sus instalaciones.");
+ h+=P("Saludos.");if(DB.settings.firma)h+=`<p style="margin:0">${esc(DB.settings.firma).replace(/\n/g,"<br>")}</p>`;
+ return `<div style="font-family:Calibri,'Segoe UI',Arial,sans-serif;font-size:14px;color:#222">${h}</div>`}
 const subjectFor=items=>{const v=[...new Set(items.map(r=>r.VS).filter(x=>x!==""&&x!=null))];return "Solicitud de cotización de materiales"+(v.length?` · V/S ${v.slice(0,6).join(" / ")}${v.length>6?"…":""}`:"")};
 let MAILS=null;
 function openPrepare(ids,resend){
@@ -384,8 +395,8 @@ function mailCard(s){const items=MAILS.g.get(s),sup=supByName(s)||{name:s,email:
   <div class="to" style="flex:0 1 190px"><span class="sub" style="margin:0">Entrega:</span><select class="in" data-bind="ment" data-s="${esc(s)}"><option value="">Sin definir</option><option value="DESPACHO" ${sup.entrega==="DESPACHO"?"selected":""}>Despacha</option><option value="RETIRO" ${sup.entrega==="RETIRO"?"selected":""}>Retiramos</option></select></div>
   ${sup.entrega==="DESPACHO"?`<div class="to" style="flex:0 1 300px"><span class="sub" style="margin:0;white-space:nowrap">Despacho a:</span><select class="in" data-bind="mdest" data-s="${esc(s)}">${destOpts(items)}</select><button class="btn xs" data-act="sedes" title="Editar direcciones">${ic("pencil","s")}</button></div>`:""}</div>
  ${(()=>{if(sup.entrega!=="DESPACHO")return"";const ds=[...new Set(items.map(destOf))].filter(Boolean);const miss=ds.filter(n=>!(sedeByName(n)||{}).dir);return miss.length?`<div class="row" style="padding:0 18px 12px"><span class="tag amber">Falta la dirección de ${esc(miss.join(", "))} · complétala en Respaldo y ajustes</span></div>`:""})()}
- <pre>${esc(body)}</pre>
- <div class="row"><button class="btn sm dark" data-act="openMail" data-s="${esc(s)}">${ic("mail","s")}Abrir en Outlook</button><button class="btn sm" data-act="copyMail" data-s="${esc(s)}">${ic("copy","s")}Copiar texto</button><button class="btn sm" data-act="emlMail" data-s="${esc(s)}">${ic("dl","s")}Descargar .eml</button><button class="btn sm green" data-act="sentMail" data-s="${esc(s)}" style="margin-left:auto" ${done?"disabled":""}>${ic("check","s")}Marcar enviado</button></div></div>`}
+ <div style="padding:14px 18px;background:#fff;border-top:1px solid var(--line);max-height:320px;overflow:auto">${emailHTML(items,s)}</div>
+ <div class="row"><button class="btn sm dark" data-act="emlMail" data-s="${esc(s)}" title="Se abre en Outlook con el correo armado y la tabla">${ic("dl","s")}Borrador con tabla</button><button class="btn sm" data-act="copyMail" data-s="${esc(s)}" title="Copia el correo con tabla para pegarlo en Outlook">${ic("copy","s")}Copiar con tabla</button><button class="btn sm" data-act="openMail" data-s="${esc(s)}" title="Este método no admite tablas: va como texto">${ic("mail","s")}Abrir como texto</button><button class="btn sm green" data-act="sentMail" data-s="${esc(s)}" style="margin-left:auto" ${done?"disabled":""}>${ic("check","s")}Marcar enviado</button></div></div>`}
 function sedesDialog(){const d=$("#dlgPick");
  d.innerHTML=`<div class="dh"><div><h2>Sedes y direcciones</h2><p>Se usan en el correo cuando el proveedor despacha</p></div><button class="ib" data-act="closePick" aria-label="Cerrar">${ic("x","s")}</button></div><div class="db" style="display:grid;gap:12px">${DB.settings.sedes.map((x,i)=>`<div style="display:grid;gap:6px"><input class="in strong" data-sede="${i}" data-f="name" value="${esc(x.name)}" placeholder="Nombre de la sede"><input class="in" data-sede="${i}" data-f="dir" value="${esc(x.dir)}" placeholder="Dirección completa"></div>`).join("")}</div><div class="df"><button class="btn green" data-act="closePick">Listo</button></div>`;
  d.querySelectorAll("[data-sede]").forEach(i=>i.oninput=()=>{DB.settings.sedes[i.dataset.sede][i.dataset.f]=i.value;save()});
@@ -394,8 +405,8 @@ function destOpts(items){const ds=[...new Set(items.map(destOf))];const cur=ds.l
 function mailURL(s){const items=MAILS.g.get(s),to=(supByName(s)?.email||"").split(/[;,]\s*/).filter(Boolean).join(",");return`mailto:${to}?subject=${encodeURIComponent(subjectFor(items))}&body=${encodeURIComponent(emailText(items,s).replace(/\n/g,"\r\n"))}`}
 function download(content,name,type){const b=new Blob([content],{type}),a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),2000)}
 function b64(s){const by=new TextEncoder().encode(s);let x="";for(let i=0;i<by.length;i+=0x8000)x+=String.fromCharCode.apply(null,by.subarray(i,i+0x8000));return btoa(x)}
-function emlFor(s){const items=MAILS.g.get(s),to=(supByName(s)?.email||"").split(/[;,]\s*/).filter(Boolean).join(", ");
- const wrap=t=>t.replace(/(.{76})/g,"$1\r\n");return["To: "+to,"Subject: =?UTF-8?B?"+b64(subjectFor(items))+"?=","X-Unsent: 1","MIME-Version: 1.0","Content-Type: text/plain; charset=UTF-8","Content-Transfer-Encoding: base64","",wrap(b64(emailText(items,s).replace(/\n/g,"\r\n")))].join("\r\n")}
+function emlFor(s){const items=MAILS.g.get(s),to=(supByName(s)?.email||"").split(/[;,]\s*/).filter(Boolean).join(", "),bd="----=_q"+Date.now().toString(36);
+ const wrap=t=>t.replace(/(.{76})/g,"$1\r\n");return["To: "+to,"Subject: =?UTF-8?B?"+b64(subjectFor(items))+"?=","X-Unsent: 1","MIME-Version: 1.0",`Content-Type: multipart/alternative; boundary="${bd}"`,"",`--${bd}`,"Content-Type: text/plain; charset=UTF-8","Content-Transfer-Encoding: base64","",wrap(b64(emailText(items,s).replace(/\n/g,"\r\n"))),"",`--${bd}`,"Content-Type: text/html; charset=UTF-8","Content-Transfer-Encoding: base64","",wrap(b64(emailHTML(items,s))),"",`--${bd}--`,""].join("\r\n")}
 function markSent(s){MAILS.g.get(s).forEach(r=>{r.enviados=r.enviados||{};r.enviados[s]=today();if(!r.COT)r.COT="ESPERA DE RESPUESTA";if(!r.ENTREGA&&(supByName(s)||{}).entrega)r.ENTREGA=supByName(s).entrega});save()}
 function refreshMail(s){const el=document.querySelector(`.mail[data-s="${CSS.escape(s)}"]`);if(el)el.outerHTML=mailCard(s);if(U.view==="cotizar")fillCotizar();else if(U.view==="compras")fillCompras()}
 
@@ -409,6 +420,15 @@ function emailTextOC(){const {items,entrega,dest}=OCM,one=items.length===1;
  if(entrega==="DESPACHO")t+=dest?`\n\nLa entrega es con despacho a la siguiente dirección: ${sedeTxt(dest)}`:`\n\nLa entrega es con despacho.`;
  else if(entrega==="RETIRO")t+=`\n\nLa entrega es con retiro por nuestra parte; agradeceré indicar cuándo podemos retirar.`;
  t+=`\n\nAgradeceré confirmar la recepción de la orden y la fecha de entrega.\n\nSaludos.`;if(DB.settings.firma)t+=`\n${DB.settings.firma}`;return t}
+function emailHTMLOC(){const {items,entrega,dest}=OCM,one=items.length===1;
+ const P=t=>`<p style="margin:0 0 14px">${t}</p>`,D=(t,x="")=>`<td style="border:1px solid #d5dde1;padding:7px 11px;vertical-align:top;${x}">${t}</td>`,H=(t,x="")=>`<th style="border:1px solid #314147;background:#314147;color:#ffffff;padding:8px 11px;text-align:left;font-weight:600;${x}">${t}</th>`;
+ const rows=items.map((r,i)=>`<tr style="background:${i%2?"#f3f6f8":"#ffffff"}">${D(i+1,"text-align:center")}${D(esc(r.DESC))}${D(esc(r.CANT),"white-space:nowrap")}</tr>`).join("");
+ let h=P("Estimados,")+P(`Junto con saludar, adjunto la Orden de Compra N° <b>${esc(items[0].OC)}</b> correspondiente ${one?"al siguiente material":"a los siguientes materiales"}:`);
+ h+=`<table style="border-collapse:collapse;margin:0 0 16px;font-size:14px"><thead><tr>${H("N°","text-align:center")}${H("Material")}${H("Cantidad")}</tr></thead><tbody>${rows}</tbody></table>`;
+ if(entrega==="DESPACHO")h+=P(dest?`La entrega es con despacho a la siguiente dirección: <b>${esc(sedeTxt(dest))}</b>`:"La entrega es con despacho.");
+ else if(entrega==="RETIRO")h+=P("La entrega es con retiro por nuestra parte; agradeceré indicar cuándo podemos retirar.");
+ h+=P("Agradeceré confirmar la recepción de la orden y la fecha de entrega.")+P("Saludos.");if(DB.settings.firma)h+=`<p style="margin:0">${esc(DB.settings.firma).replace(/\n/g,"<br>")}</p>`;
+ return `<div style="font-family:Calibri,'Segoe UI',Arial,sans-serif;font-size:14px;color:#222">${h}</div>`}
 function subjectOC(){const v=[...new Set(OCM.items.map(r=>r.VS).filter(x=>x!==""&&x!=null))];return `Orden de Compra N° ${OCM.items[0].OC}`+(v.length?` · V/S ${v.slice(0,6).join(" / ")}`:"")}
 const ocTo=()=>(supByName(OCM.items[0].PROV)?.email||"").split(/[;,]\s*/).filter(Boolean).join(",");
 function openOC(id){const r=byId(id);if(!r)return;const items=ocGroup(r);
@@ -422,18 +442,18 @@ function openOC(id){const r=byId(id);if(!r)return;const items=ocGroup(r);
   <div class="w4"><div class="sec" style="margin:4px 0 8px">Documento adjunto (OC en PDF)</div><div class="row"><label class="btn sm" style="cursor:pointer">${ic("ul","s")}Elegir archivo(s)<input type="file" id="ocFile" multiple hidden></label><div class="chips" id="ocList"></div></div></div>
  </div>
  <div class="sec" style="margin:18px 0 8px">Vista previa · Asunto: <span id="ocSub" style="text-transform:none;letter-spacing:0"></span></div>
- <div class="mail" style="margin:0"><pre id="ocPre" style="border-top:0;max-height:280px"></pre></div>
+ <div class="mail" style="margin:0"><div id="ocPre" style="padding:14px 18px;background:#fff;max-height:300px;overflow:auto"></div></div>
  <div class="note" style="margin-top:14px">Outlook no permite adjuntar archivos desde un enlace. Elige el PDF y usa <b>Descargar borrador con adjunto</b>: al abrir el .eml se crea el correo con el documento ya adjunto, listo para enviar.</div></div>
- <div class="df"><button class="btn" data-act="ocCopy">${ic("copy","s")}Copiar texto</button><button class="btn" data-act="ocMailto">${ic("mail","s")}Abrir sin adjunto</button><button class="btn dark" data-act="ocEml">${ic("dl","s")}Descargar borrador con adjunto</button><button class="btn green" data-act="ocSent">${ic("check","s")}Marcar OC enviada</button></div>`;
+ <div class="df"><button class="btn" data-act="ocCopy">${ic("copy","s")}Copiar con tabla</button><button class="btn" data-act="ocMailto" title="Este método no admite tablas: va como texto">${ic("mail","s")}Abrir como texto (sin adjunto)</button><button class="btn dark" data-act="ocEml">${ic("dl","s")}Descargar borrador con adjunto</button><button class="btn green" data-act="ocSent">${ic("check","s")}Marcar OC enviada</button></div>`;
  $("#ocTo").onchange=e=>{const s=supByName(prov);if(s){s.email=e.target.value.trim()}else DB.suppliers.push({name:prov,email:e.target.value.trim(),phone:""});save()};
  $("#ocEnt").onchange=e=>{OCM.entrega=e.target.value;OCM.items.forEach(r=>r.ENTREGA=OCM.entrega);save();updOC()};
  $("#ocDest").onchange=e=>{OCM.dest=e.target.value;OCM.items.forEach(r=>r.DEST=OCM.dest);save();updOC()};
  $("#ocFile").onchange=e=>{OCM.files=[...OCM.files,...e.target.files];e.target.value="";updOC()};
  updOC();dlg.showModal()}
-function updOC(){$("#ocDestW").classList.toggle("hidden",OCM.entrega!=="DESPACHO");$("#ocPre").textContent=emailTextOC();$("#ocSub").textContent=subjectOC();
+function updOC(){$("#ocDestW").classList.toggle("hidden",OCM.entrega!=="DESPACHO");$("#ocPre").innerHTML=emailHTMLOC();$("#ocSub").textContent=subjectOC();
  $("#ocList").innerHTML=OCM.files.map((f,i)=>`<span class="chip">${esc(f.name)}<button data-act="ocRm" data-i="${i}" aria-label="Quitar">${ic("x","s")}</button></span>`).join("")||`<span class="sub">Ningún archivo elegido</span>`}
 async function emlOC(){const body=emailTextOC().replace(/\n/g,"\r\n"),subj=subjectOC(),bd="----=_oc"+Date.now().toString(36),to=($("#ocTo").value||ocTo()).split(/[;,]\s*/).filter(Boolean).join(", ");
- const p=["To: "+to,"Subject: =?UTF-8?B?"+b64(subj)+"?=","X-Unsent: 1","MIME-Version: 1.0",`Content-Type: multipart/mixed; boundary="${bd}"`,"",`--${bd}`,"Content-Type: text/plain; charset=UTF-8","Content-Transfer-Encoding: base64","",wrap76(b64(body)),""];
+ const p=["To: "+to,"Subject: =?UTF-8?B?"+b64(subj)+"?=","X-Unsent: 1","MIME-Version: 1.0",`Content-Type: multipart/mixed; boundary="${bd}"`,"",`--${bd}`,`Content-Type: multipart/alternative; boundary="${bd.replace("oc","ia")}"`,"",`--${bd.replace("oc","ia")}`,"Content-Type: text/plain; charset=UTF-8","Content-Transfer-Encoding: base64","",wrap76(b64(body)),"",`--${bd.replace("oc","ia")}`,"Content-Type: text/html; charset=UTF-8","Content-Transfer-Encoding: base64","",wrap76(b64(emailHTMLOC())),"",`--${bd.replace("oc","ia")}--`,""];
  for(const f of OCM.files){const ab=new Uint8Array(await f.arrayBuffer());let x="";for(let i=0;i<ab.length;i+=0x8000)x+=String.fromCharCode.apply(null,ab.subarray(i,i+0x8000));const nm=f.name.replace(/[^\x20-\x7e]/g,"_").replace(/"/g,"'");
   p.push(`--${bd}`,`Content-Type: ${f.type||"application/octet-stream"}; name="${nm}"`,"Content-Transfer-Encoding: base64",`Content-Disposition: attachment; filename="${nm}"; filename*=UTF-8''${encodeURIComponent(f.name)}`,"",wrap76(btoa(x)),"")}
  p.push(`--${bd}--`,"");return p.join("\r\n")}
@@ -737,7 +757,7 @@ const ACT={
  clearF:()=>{U.f={prov:"",op:"",entrega:"",sede:""};U.page=1;viewCompras()},
  sendOC:d=>openOC(d.id),
  ocRm:d=>{OCM.files.splice(Number(d.i),1);updOC()},
- ocCopy:async()=>{try{await navigator.clipboard.writeText(`Asunto: ${subjectOC()}\n\n${emailTextOC()}`);toast("Texto copiado")}catch(e){toast("No se pudo copiar")}},
+ ocCopy:async()=>{const t=`Asunto: ${subjectOC()}\n\n${emailTextOC()}`;try{await navigator.clipboard.write([new ClipboardItem({"text/html":new Blob([emailHTMLOC()],{type:"text/html"}),"text/plain":new Blob([t],{type:"text/plain"})})]);toast("Copiado con tabla: pégalo en el correo")}catch(e){try{await navigator.clipboard.writeText(t);toast("Texto copiado (sin tabla)")}catch(x){toast("No se pudo copiar")}}},
  ocMailto:()=>{const to=($("#ocTo").value||ocTo()).split(/[;,]\s*/).filter(Boolean).join(",");const a=document.createElement("a");a.href=`mailto:${to}?subject=${encodeURIComponent(subjectOC())}&body=${encodeURIComponent(emailTextOC().replace(/\n/g,"\r\n"))}`;document.body.appendChild(a);a.click();a.remove();toast("Adjunta el PDF a mano o usa el borrador con adjunto")},
  ocEml:async()=>{if(!OCM.files.length&&!confirm("No elegiste ningún archivo. ¿Descargar el borrador sin adjunto?"))return;download(await emlOC(),"OC_"+String(OCM.items[0].OC).replace(/\W+/g,"_")+".eml","message/rfc822");toast("Borrador descargado: ábrelo con Outlook")},
  ocSent:()=>{OCM.items.forEach(r=>r.ocEnviada=today());save();$("#dlg").close();toast("OC marcada como enviada");render()},
@@ -754,7 +774,7 @@ const ACT={
  quote1:d=>{const r=byId(d.id);if(!(r.asignados||[]).length){pickSuppliers({title:"¿A quién cotizar?",sub:r.DESC,suggestions:suggest(r),onOk:l=>{if(!l.length)return;r.asignados=l;save();openPrepare([r.id],true)}});return}openPrepare([d.id],true)},
  resend:(d,t)=>openPrepare(MAILS.ids,t.checked),
  openMail:d=>{const url=mailURL(d.s);if(url.length>1900){download(emlFor(d.s),"cotizacion_"+d.s.replace(/\W+/g,"_")+".eml","message/rfc822");toast("Correo largo: se descargó un borrador .eml, ábrelo con Outlook")}else{const a=document.createElement("a");a.href=url;document.body.appendChild(a);a.click();a.remove()}},
- copyMail:async d=>{const t=`Asunto: ${subjectFor(MAILS.g.get(d.s))}\n\n${emailText(MAILS.g.get(d.s),d.s)}`;try{await navigator.clipboard.writeText(t);toast("Texto copiado")}catch(e){toast("No se pudo copiar")}},
+ copyMail:async d=>{const it=MAILS.g.get(d.s),t=`Asunto: ${subjectFor(it)}\n\n${emailText(it,d.s)}`;try{await navigator.clipboard.write([new ClipboardItem({"text/html":new Blob([emailHTML(it,d.s)],{type:"text/html"}),"text/plain":new Blob([t],{type:"text/plain"})})]);toast("Copiado con tabla: pégalo en el correo")}catch(e){try{await navigator.clipboard.writeText(t);toast("Texto copiado (sin tabla)")}catch(x){toast("No se pudo copiar")}}},
  emlMail:d=>download(emlFor(d.s),"cotizacion_"+d.s.replace(/\W+/g,"_")+".eml","message/rfc822"),
  sentMail:d=>{markSent(d.s);refreshMail(d.s);toast(`Marcado como enviado: ${d.s}`)},
  markAll:()=>{[...MAILS.g.keys()].forEach(s=>markSent(s));openPrepare(MAILS.ids,MAILS.resend);if(U.view==="cotizar")fillCotizar()},
