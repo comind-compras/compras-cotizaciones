@@ -253,7 +253,7 @@ const strip=s=>norm(s).normalize("NFD").replace(/[\u0300-\u036f]/g,"");
 function sedeByName(n){return DB.settings.sedes.find(x=>strip(x.name)===strip(n))}
 function destOf(r){if(r.DEST&&sedeByName(r.DEST))return r.DEST;const s=sedeByName(r.OP);return s?s.name:""}
 const sedeTxt=n=>{const s=sedeByName(n);return s?(s.dir?`${s.name} – ${s.dir}`:s.name):""};
-function save(){try{localStorage.setItem(KEY,JSON.stringify(DB))}catch(e){toast("No se pudo guardar en este navegador. Descarga un respaldo.")}updateDot();cMark()}
+function save(){stampRecs();try{localStorage.setItem(KEY,JSON.stringify(DB))}catch(e){toast("No se pudo guardar en este navegador. Descarga un respaldo.")}updateDot();cMark()}
 const byId=id=>DB.records.find(r=>r.id===id);
 const supByName=n=>DB.suppliers.find(s=>norm(s.name)===norm(n));
 const U={view:"compras",page:1,size:10,q:"",estado:"",hideRed:false,f:{prov:"",op:"",entrega:"",sede:""},sort:{k:"seq",d:-1},
@@ -325,7 +325,7 @@ function fillCompras(){
  ${rows.map(r=>`<tr class="r-${r.estado}">
   <td><div class="vs">${esc(r.VS||"—")}</div><div class="sub">${esc(r.OP||"")}</div></td>
   <td><div class="tags"><span class="tag ${r.estado}">${ST[r.estado].s}</span>${r.COT?`<span class="tag ${norm(r.COT)==="si"?"ok":norm(r.COT)==="no"?"warn":"amber"}">Cotizado: ${esc(r.COT==="ESPERA DE RESPUESTA"?"en espera":r.COT)}</span>`:""}${r.ENTREGA?`<span class="tag">${esc(r.ENTREGA)}</span>`:""}</div></td>
-  <td style="min-width:250px"><div class="strong clamp">${esc(r.DESC)}</div>${r.OBS?`<div class="sub clamp">${esc(r.OBS)}</div>`:""}</td>
+  <td style="min-width:250px"><div class="strong clamp">${esc(r.DESC)}</div>${r.OBS?`<div class="sub clamp">${esc(r.OBS)}</div>`:""}${r.mod||r.cre?`<div class="sub" style="font-size:11.5px;opacity:.85">${r.mod?"Mod.":"Creó"} ${esc(r.mod||r.cre)} · ${fmtT(r.mod?r.modF:r.creF)}</div>`:""}</td>
   <td class="strong">${esc(r.CANT)}</td>
   <td>${r.PROV?`<div class="strong">${esc(r.PROV)}</div>`:""}${(r.asignados||[]).length&&!r.PROV?`<div class="chips">${chips(r)}</div>`:""}${!r.PROV&&!(r.asignados||[]).length?`<span class="sub">Sin asignar</span>`:""}</td>
   <td>${r.OC?`<div class="strong">${esc(r.OC)}</div>`:""}<div class="sub">${esc(r.APR||"")}</div>${r.ocEnviada?`<div style="margin-top:4px"><span class="tag ok">OC enviada ${fmtD(r.ocEnviada)}</span></div>`:""}</td>
@@ -488,7 +488,7 @@ function openForm(id){
   ${fld("FECHA","Recibido el",`<input class="in" type="date" name="FECHA" value="${esc(r.FECHA)}">`,"w2")}
   ${fld("estado","Color / estado",`<select class="in" name="estado">${Object.entries(ST).map(([k,v])=>`<option value="${k}" ${k===r.estado?"selected":""}>${v.t}</option>`).join("")}</select>`,"w2")}
   ${fld("NOTAS","Notas",`<input class="in" name="NOTAS" value="${esc(r.NOTAS)}">`,"w4")}
- </div></details></div>
+ </div></details>${auditTxt(r)}</div>
  <div class="df"><button type="button" class="btn" data-act="closeDlg">Cancelar</button><button type="submit" class="btn green">${ic("check")}Guardar</button></div></form>`;
  const f=$("#rf");drawFormChips();if(!canE("compras")){f.querySelectorAll("input,select,textarea,[type=submit]").forEach(x=>x.disabled=true);f.querySelector("h2").textContent="Ver solicitud"}if(!canE("cotizar"))f.querySelectorAll("details.more input,details.more select,details.more textarea").forEach(x=>x.disabled=true);
  if(!id)f.elements.DESC.addEventListener("input",()=>{const sp=lastSup(f.elements.DESC.value.trim());if(sp&&(FORM.auto||!FORM.asignados.length)){FORM.asignados=[sp];FORM.auto=true;FORM.autoFrom=sp}else if(!sp&&FORM.auto){FORM.asignados=[];FORM.auto=false}drawFormChips()});
@@ -504,7 +504,7 @@ function saveForm(f){if(!canE("compras"))return;
  if(o.PROV&&!supByName(o.PROV))DB.suppliers.push({name:o.PROV,email:"",phone:"",entrega:""});
  if(!DB.materials.some(m=>norm(m.name)===norm(o.DESC)))DB.materials.push({name:o.DESC,unit:""});
  o.asignados=FORM.asignados;
- if(FORM.id){const r=byId(FORM.id);Object.assign(r,o)}else{o.id="n"+Date.now().toString(36)+Math.random().toString(36).slice(2,5);o.seq=Math.max(0,...DB.records.map(r=>r.seq))+1;o.enviados={};DB.records.push(o)}
+ if(FORM.id){const r=byId(FORM.id);Object.assign(r,o)}else{o.id="n"+Date.now().toString(36)+Math.random().toString(36).slice(2,5);o.seq=Math.max(0,...DB.records.map(r=>r.seq))+1;o.enviados={};o.cre=cur().name;o.creF=new Date().toISOString();DB.records.push(o)}
  save();$("#dlg").close();toast("Solicitud guardada");render()}
 
 /* ---------- Proveedores / Materiales ---------- */
@@ -565,8 +565,8 @@ function impDialog(){const d=$("#dlgPick");
  d.showModal()}
 
 /* ---------- nube (Supabase) ---------- */
-/* ▼▼ Escribe aquí el correo y la contraseña de la cuenta técnica de Supabase (Authentication). Con eso cada equipo se conecta solo a la nube. ▼▼ */
-const CLOUD_AUTO={email:"humorivas25@gmail.com",password:"humorivas2026"};
+/* Cuenta técnica de la nube (ofuscada, no es seguridad real). Para cambiarla, pídele a Claude que regenere estas dos líneas. */
+const CLOUD_AUTO=(()=>{const k="comind",d=s=>{const b=atob(s);let o="";for(let i=0;i<b.length;i++)o+=String.fromCharCode(b.charCodeAt(i)^k.charCodeAt(i%k.length));return o};return{email:d("CxoABhwNFQ4eW1skBAIMAAJKAAAA"),password:d("CxoABhwNFQ4eW15WVQ==")}})();
 const CLOUD_DEFAULT={url:"https://schiczuxllwuwhmchwar.supabase.co",key:"sb_publishable_2ppxfJkSjy3SqbAkSLBH3Q_8jRQSfQ6"};
 const CKEY="compras_cloud_v1";
 const CL=Object.assign({url:"",key:"",email:"",access:"",refresh:"",exp:0,rev:0,auto:true,dirty:false,last:""},(()=>{try{return JSON.parse(localStorage.getItem(CKEY))||{}}catch(e){return{}}})());
@@ -602,12 +602,12 @@ async function cPush(force){
   const rem=await cReq("app_state?id=eq.main&select=rev");const h=rem&&rem[0];
   if(!h){const a=await cReq("app_state",{method:"POST",headers:{Prefer:"return=representation"},body:JSON.stringify({id:"main",data:DB,rev:1})});CL.rev=a[0].rev;break}
   if(force)CL.rev=h.rev;
-  else if(h.rev!==CL.rev){const x=await cGet();if(x&&x.data&&Array.isArray(x.data.records)){DB=mergeDB(getBase(),DB,x.data);ensureSettings();try{localStorage.setItem(KEY,JSON.stringify(DB))}catch(e){}CL.rev=x.rev;render();toast("Se combinaron los cambios de otro usuario")}}
+  else if(h.rev!==CL.rev){const x=await cGet();if(x&&x.data&&Array.isArray(x.data.records)){DB=mergeDB(getBase(),DB,x.data);ensureSettings();try{localStorage.setItem(KEY,JSON.stringify(DB))}catch(e){}CL.rev=x.rev;snapRecs();render();toast("Se combinaron los cambios de otro usuario")}}
   const a=await cReq(`app_state?id=eq.main&rev=eq.${CL.rev}`,{method:"PATCH",headers:{Prefer:"return=representation"},body:JSON.stringify({data:DB,rev:CL.rev+1})});
   if(a&&a.length){CL.rev=a[0].rev;break}
   if(t===3)return"conflict"}
  CL.dirty=false;CL.last=new Date().toISOString();setBase();cSave();return"ok"}
-async function cPull(){const rem=await cGet();if(!rem)return false;if(!rem.data||!Array.isArray(rem.data.records)||!Array.isArray(rem.data.suppliers)||!Array.isArray(rem.data.materials))throw new Error("Los datos de la nube no tienen el formato esperado");{const us=DB.users;DB=rem.data;if(!Array.isArray(DB.users)||!DB.users.length)DB.users=us||[]}ensureSettings();try{localStorage.setItem(KEY,JSON.stringify(DB))}catch(e){}CL.rev=rem.rev;CL.dirty=false;setBase();CL.last=new Date().toISOString();cSave();updateDot();render();return true}
+async function cPull(){const rem=await cGet();if(!rem)return false;if(!rem.data||!Array.isArray(rem.data.records)||!Array.isArray(rem.data.suppliers)||!Array.isArray(rem.data.materials))throw new Error("Los datos de la nube no tienen el formato esperado");{const us=DB.users;DB=rem.data;if(!Array.isArray(DB.users)||!DB.users.length)DB.users=us||[]}ensureSettings();try{localStorage.setItem(KEY,JSON.stringify(DB))}catch(e){}CL.rev=rem.rev;CL.dirty=false;setBase();snapRecs();CL.last=new Date().toISOString();cSave();updateDot();render();return true}
 async function cAutoConnect(){if(cOn()||!CLOUD_AUTO.email||!CLOUD_AUTO.password)return;try{await cAuth({email:CLOUD_AUTO.email,password:CLOUD_AUTO.password},"password");CL.email=CLOUD_AUTO.email;cSave();await cAfterLogin()}catch(e){CL.access="";CL.refresh="";cSave()}}
 function cMark(){if(cOn()){CL.dirty=true;cSave();cSched()}}
 function cSched(){if(!CL.auto||!cOn())return;clearTimeout(cT);cStat("pending");cT=setTimeout(cAuto,4000)}
@@ -637,7 +637,7 @@ function viewDatos(){
  ${SEED.records.length?`<div class="panel"><h3>Datos originales</h3><p>Vuelve a cargar los ${SEED.records.length} registros del Excel. Se pierden los cambios hechos aquí.</p><button class="btn sm danger" data-act="reset">Restaurar datos del Excel</button></div>`:""}</div>`;
  document.querySelectorAll("[data-sede]").forEach(i=>i.oninput=()=>{DB.settings.sedes[i.dataset.sede][i.dataset.f]=i.value;save()});
  $("#firma").oninput=e=>{DB.settings.firma=e.target.value;save()};
- $("#impJSON").onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const d=JSON.parse(await f.text());if(!Array.isArray(d.records)||!Array.isArray(d.suppliers)||!Array.isArray(d.materials))throw 0;if(!d.records.every(r=>r.id&&r.estado))throw 0;if(confirm("Importar reemplaza los datos actuales. ¿Continuar?")){const us=DB.users;DB=d;if(!Array.isArray(d.users)||!d.users.length)DB.users=us;ensureSettings();save();toast("Respaldo importado");render()}}catch(x){toast("Ese archivo no es un respaldo válido de esta versión")}e.target.value=""}}
+ $("#impJSON").onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const d=JSON.parse(await f.text());if(!Array.isArray(d.records)||!Array.isArray(d.suppliers)||!Array.isArray(d.materials))throw 0;if(!d.records.every(r=>r.id&&r.estado))throw 0;if(confirm("Importar reemplaza los datos actuales. ¿Continuar?")){const us=DB.users;DB=d;if(!Array.isArray(d.users)||!d.users.length)DB.users=us;ensureSettings();snapRecs();save();toast("Respaldo importado");render()}}catch(x){toast("Ese archivo no es un respaldo válido de esta versión")}e.target.value=""}}
 function legend(){return `<div class="legend"><div><span class="sw" style="background:var(--c-green)"></span>Verde: comprado / recepcionado</div><div><span class="sw" style="background:var(--c-yellow)"></span>Amarillo: OC emitida sin recepción</div><div><span class="sw" style="background:var(--c-red)"></span>Rojo: se anula o rechaza la compra</div><div><span class="sw" style="background:#fff"></span>Blanco: no cotizado o en espera de cotización</div></div>`}
 function exportCSV(){const q=(s)=>'"'+String(s??"").replace(/"/g,'""')+'"';const ESTN={white:"BLANCO",yellow:"AMARILLO",green:"VERDE",red:"ROJO"};
  const arr=U.view==="compras"?sortRecs(filtered()):DB.records.slice().sort((a,b)=>a.seq-b.seq);
@@ -712,6 +712,13 @@ function userDialog(id){const u=id?DB.users.find(x=>x.id===id):{name:"",user:"",
 /* oculta todo botón cuyo permiso no tenga el usuario (la verificación real está en run()) */
 let lk=0;new MutationObserver(()=>{cancelAnimationFrame(lk);lk=requestAnimationFrame(()=>document.querySelectorAll("[data-act]").forEach(e=>{if(!permit(e.dataset.act))e.classList.add("hidden")}))}).observe(document.body,{childList:true,subtree:true});
 
+/* ---------- quién y cuándo: creado por / modificado por ---------- */
+let SNAP=null;
+const snapRecs=()=>{SNAP=new Map(DB.records.map(r=>[r.id,JSON.stringify(r)]))};
+function stampRecs(){const u=cur();if(!SNAP){snapRecs();return}if(!u)return;const t=new Date().toISOString();DB.records.forEach(r=>{const o=SNAP.get(r.id);if(o!==undefined&&JSON.stringify(r)!==o){r.mod=u.name;r.modF=t}});snapRecs()}
+const fmtT=s=>{const d=new Date(s);return isNaN(d)?"":d.toLocaleString("es-CL",{day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"})};
+const auditTxt=r=>(r.cre||r.mod)?`<div class="sub" style="margin-top:14px">${r.cre?`Creado por <b>${esc(r.cre)}</b> · ${fmtT(r.creF)}`:""}${r.cre&&r.mod?" — ":""}${r.mod?`Última modificación: <b>${esc(r.mod)}</b> · ${fmtT(r.modF)}`:""}</div>`:"";
+snapRecs();
 /* ---------- eventos ---------- */
 const ACT={
  go:d=>go(d.v),
@@ -769,7 +776,7 @@ const ACT={
  cloudOut:()=>{CL.access="";CL.refresh="";CL.exp=0;cSave();cStat("off");render()},
  cloudAuto:(d,t)=>{CL.auto=t.checked;cSave();if(CL.auto&&CL.dirty)cSched()},
  copySheets, exportCSV,  expJSON:()=>download(JSON.stringify({version:2,exportedAt:new Date().toISOString(),...DB},null,1),"respaldo_compras_"+today()+".json","application/json"),
- reset:()=>{if(confirm("Se reemplazan todos los datos por los del Excel original (y, si la nube está conectada, también lo que hay allá). ¿Continuar?")){const us=DB.users;DB=JSON.parse(JSON.stringify(SEED));DB.users=us;ensureSettings();save();toast("Datos restaurados");render()}}
+ reset:()=>{if(confirm("Se reemplazan todos los datos por los del Excel original (y, si la nube está conectada, también lo que hay allá). ¿Continuar?")){const us=DB.users;DB=JSON.parse(JSON.stringify(SEED));DB.users=us;ensureSettings();snapRecs();save();toast("Datos restaurados");render()}}
 };
 document.addEventListener("click",e=>{
  const pop=$("#pop");if(pop&&!pop.classList.contains("hidden")&&!e.target.closest("#pop,[data-act=togglePop]"))pop.classList.add("hidden");
