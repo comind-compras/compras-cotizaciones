@@ -555,13 +555,13 @@ function impDialog(){const d=$("#dlgPick");
  d.showModal()}
 
 /* ---------- nube (Supabase) ---------- */
-const CLOUD_DEFAULT={url:"",key:""};
+const CLOUD_DEFAULT={url:"https://schiczuxllwuwhmchwar.supabase.co",key:"sb_publishable_2ppxfJkSjy3SqbAkSLBH3Q_8jRQSfQ6"};
 const CKEY="compras_cloud_v1";
 const CL=Object.assign({url:"",key:"",email:"",access:"",refresh:"",exp:0,rev:0,auto:true,dirty:false,last:""},(()=>{try{return JSON.parse(localStorage.getItem(CKEY))||{}}catch(e){return{}}})());
 if(!CL.url)CL.url=CLOUD_DEFAULT.url;if(!CL.key)CL.key=CLOUD_DEFAULT.key;
 const cSave=()=>{try{localStorage.setItem(CKEY,JSON.stringify(CL))}catch(e){}};
 const cOn=()=>!!(CL.url&&CL.key&&CL.refresh);
-const cBase=()=>CL.url.replace(/\/+$/,"");
+const cBase=()=>CL.url.trim().replace(/\/+$/,"").replace(/\/rest\/v1$/,"").replace(/\/+$/,"");
 let cT=null,cBusy=false;
 const CST={off:"Nube: sin conectar",ok:"Nube: al día",pending:"Nube: guardando…",err:"Nube: sin conexión",conflict:"Nube: elige versión"};
 function cStat(k){const e=document.querySelector("#cloudSt span");if(e)e.textContent=CST[k]||""}
